@@ -13,10 +13,12 @@
         <option value="$PROJECT_DIR$/order-service/order-service/pom.xml" />
         <option value="$PROJECT_DIR$/Infraestructura/api-gateway/pom.xml" />
         <option value="$PROJECT_DIR$/Infraestructura/config-server/pom.xml" />
-        <option value="$PROJECT_DIR$/Infraestructura/service-registry/pom.xml" />
         <option value="$PROJECT_DIR$/Services/inventory-service/pom.xml" />
         <option value="$PROJECT_DIR$/Services/order-service/pom.xml" />
         <option value="$PROJECT_DIR$/Services/product-service/pom.xml" />
+        <option value="$PROJECT_DIR$/Infraestructura/auth-service/pom.xml" />
+        <option value="$PROJECT_DIR$/Infraestructura/usuario-service/pom.xml" />
+        <option value="$PROJECT_DIR$/Infraestructura/service-registry/pom.xml" />
       </list>
     </option>
   </component>

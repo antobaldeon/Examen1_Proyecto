@@ -6,3 +6,6 @@ spring:
     name: api-gateway
   config:
     import: "optional:configserver:http://localhost:8089"
+
+jwt:
+  secret: ESTA_ES_UNA_CLAVE_SECRETA_MUY_LARGA_PARA_FIRMAR_TOKENS_123456

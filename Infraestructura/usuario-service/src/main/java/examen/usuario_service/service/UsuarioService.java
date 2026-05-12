@@ -5,7 +5,7 @@ import examen.usuario_service.dto.UsuarioResponse;
 
 import java.util.List;
 
-public interface UsuarrioService {
+public interface UsuarioService {
 
     UsuarioResponse register(UsuarioRequest request);
 

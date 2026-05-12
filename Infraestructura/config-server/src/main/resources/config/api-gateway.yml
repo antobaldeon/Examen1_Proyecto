@@ -1,6 +1,3 @@
-server:
-  port: 8061
-
 eureka:
   client:
     serviceUrl:
@@ -40,12 +37,22 @@ spring:
               args:
                 name: orderServiceGateway
 
+        - id: usuario-service
+          uri: lb://USUARIO-SERVICE
+          predicates:
+            - Path=/api/v1/usuarios,/api/v1/usuarios/**
+
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/auth,/api/v1/auth/**
+
 management:
   tracing:
     sampling:
       probability: 1.0
   health:
-    circuitbreakers:
+      circuitbreakers:
       enabled: true
   endpoints:
     web:
