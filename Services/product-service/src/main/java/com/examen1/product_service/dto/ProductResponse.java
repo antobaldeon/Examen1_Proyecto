@@ -22,8 +22,10 @@ public class ProductResponse {
     private String nombre;
     private String descripcion;
     private String categoria;
-    private Double precio;
     private String codigo;
     private String estado;
     private LocalDateTime fechaCreacion;
+
+    private Double precio;
+    private String tipoMoneda;
 }

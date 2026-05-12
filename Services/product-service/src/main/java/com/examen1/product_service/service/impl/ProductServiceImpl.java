@@ -5,6 +5,7 @@ import com.examen1.product_service.dto.ProductResponse;
 import com.examen1.product_service.mapper.ProductMapper;
 import com.examen1.product_service.model.Product;
 import com.examen1.product_service.repository.ProductRepository;
+import com.examen1.product_service.service.service.PricingService;
 import com.examen1.product_service.service.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
