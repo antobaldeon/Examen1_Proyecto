@@ -27,8 +27,16 @@ public class Order {
     private OrderStatus estado;
 
     @Column(nullable = false)
+    private Double subtotal;
+
+    @Column(nullable = false)
+    private Double igv;
+
+    @Column(nullable = false)
     private Double total;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> detalles;
+
+
 }

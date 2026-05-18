@@ -18,6 +18,8 @@ public class OrderMapper {
         response.setTipo(order.getTipo());
         response.setFecha(order.getFecha());
         response.setEstado(order.getEstado());
+        response.setSubtotal(order.getSubtotal());
+        response.setIgv(order.getIgv());
         response.setTotal(order.getTotal());
 
         if (order.getDetalles() != null) {

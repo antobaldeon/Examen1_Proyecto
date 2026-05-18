@@ -16,6 +16,6 @@ public class PricingResponse {
     private Long productId;
     private BigDecimal precio;
     private String tipoMoneda;
-    private LocalDateTime incioPrecio;
+    private LocalDateTime inicioPrecio;
     private LocalDateTime finPrecio;
 }

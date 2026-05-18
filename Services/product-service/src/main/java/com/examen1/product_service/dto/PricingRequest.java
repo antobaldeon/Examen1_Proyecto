@@ -12,6 +12,6 @@ public class PricingRequest {
 
     private BigDecimal precio;
     private String tipoMoneda;
-    private LocalDateTime incioPrecio;
+    private LocalDateTime inicioPrecio;
     private LocalDateTime finPrecio;
 }

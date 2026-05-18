@@ -13,6 +13,9 @@ public class OrderDetailMapper {
         response.setProductId(detail.getProductId());
         response.setCantidad(detail.getCantidad());
         response.setPrecioUnitario(detail.getPrecioUnitario());
+        response.setSubtotal(detail.getSubtotal());
+        response.setIgv(detail.getIgv());
+        response.setTotal(detail.getTotal());
         return response;
     }
 }

@@ -37,6 +37,14 @@ public class ProductController {
                 .header("X-Service-Port", serverPort)
                 .body(service.getAll());
     }
+    @GetMapping("/codigo/{codigo}")
+    public ResponseEntity<ProductResponse> findByCodigo(@PathVariable String codigo) {
+        logRequest("GET /api/v1/products/codigo/" + codigo);
+        return ResponseEntity.ok()
+                .header("X-Service-Port", serverPort)
+                .body(service.getByCodigo(codigo));
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> findById(@PathVariable Long id) {
@@ -45,6 +53,7 @@ public class ProductController {
                 .header("X-Service-Port", serverPort)
                 .body(service.getById(id));
     }
+
 
     @GetMapping("/instance")
     public ResponseEntity<Map<String, Object>> instance() {

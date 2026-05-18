@@ -2,6 +2,7 @@ package com.examen1.product_service.service.service;
 
 import com.examen1.product_service.dto.PricingRequest;
 import com.examen1.product_service.dto.PricingResponse;
+import com.examen1.product_service.dto.ProductResponse;
 
 import java.util.List;
 

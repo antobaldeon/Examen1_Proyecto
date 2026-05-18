@@ -14,6 +14,8 @@ import java.util.List;
         "tipo",
         "fecha",
         "estado",
+        "subtotal",
+        "igv",
         "total",
         "detalles"
 })
@@ -23,6 +25,8 @@ public class OrderResponse {
     private OrderType tipo;
     private LocalDateTime fecha;
     private OrderStatus estado;
+    private Double subtotal;
+    private Double igv;
     private Double total;
     private List<OrderDetailResponse> detalles;
 }

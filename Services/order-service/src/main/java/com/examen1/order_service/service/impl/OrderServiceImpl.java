@@ -1,7 +1,5 @@
 package com.examen1.order_service.service.impl;
 
-import com.examen1.order_service.client.InventoryClient;
-import com.examen1.order_service.client.ProductClient;
 import com.examen1.order_service.dto.OrderDetailResponse;
 import com.examen1.order_service.dto.OrderRequest;
 import com.examen1.order_service.dto.OrderResponse;
@@ -10,8 +8,6 @@ import com.examen1.order_service.mapper.OrderMapper;
 import com.examen1.order_service.model.*;
 import com.examen1.order_service.repository.OrderRepository;
 import com.examen1.order_service.service.service.OrderService;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,12 +17,14 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class OrderServideImpl implements OrderService {
+public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository repository;
     private final OrderMapper mapper;
     private final ProductLookupService productLookupService;
     private final InventoryLookupService inventoryLookupService;
+
+
 
     @Override
     public OrderResponse create(OrderRequest request) {
@@ -53,7 +51,13 @@ public class OrderServideImpl implements OrderService {
             detail.setProductId(detailRequest.getProductId());
             detail.setCantidad(detailRequest.getCantidad());
             detail.setPrecioUnitario(product.getPrecio());
+            double totalDetalle = detailRequest.getCantidad() * product.getPrecio();
+            double subtotalDetalle = roundTwoDecimals(totalDetalle / 1.18);
+            double igvDetalle = roundTwoDecimals(totalDetalle - subtotalDetalle);
 
+            detail.setSubtotal(subtotalDetalle);
+            detail.setIgv(igvDetalle);
+            detail.setTotal(roundTwoDecimals(totalDetalle));
             detalles.add(detail);
             StockUpdateRequest stockRequest = new StockUpdateRequest();
             stockRequest.setCantidad(detailRequest.getCantidad());
@@ -66,10 +70,20 @@ public class OrderServideImpl implements OrderService {
 
         order.setDetalles(detalles);
 
-        double total = detalles.stream()
-                .mapToDouble(detail -> detail.getCantidad() * detail.getPrecioUnitario())
-                .sum();
+        double subtotal = roundTwoDecimals(detalles.stream()
+                .mapToDouble(OrderDetail::getSubtotal)
+                .sum());
 
+        double igv = roundTwoDecimals(detalles.stream()
+                .mapToDouble(OrderDetail::getIgv)
+                .sum());
+
+        double total = roundTwoDecimals(detalles.stream()
+                .mapToDouble(OrderDetail::getTotal)
+                .sum());
+
+        order.setSubtotal(subtotal);
+        order.setIgv(igv);
         order.setTotal(total);
         order.setEstado(OrderStatus.COMPLETADA);
 
@@ -106,6 +120,7 @@ public class OrderServideImpl implements OrderService {
                 .toList();
     }
 
+
     @Override
     public OrderResponse getById(Long id) {
         Order order = repository.findById(id)
@@ -121,6 +136,9 @@ public class OrderServideImpl implements OrderService {
         }
 
         return response;
+    }
+    private double roundTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 
 

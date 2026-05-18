@@ -24,4 +24,13 @@ public class OrderDetail {
 
     @Column(name = "precio_unitario", nullable = false)
     private Double precioUnitario;
+
+    @Column(nullable = false)
+    private Double subtotal;
+
+    @Column(nullable = false)
+    private Double igv;
+
+    @Column(nullable = false)
+    private Double total;
 }

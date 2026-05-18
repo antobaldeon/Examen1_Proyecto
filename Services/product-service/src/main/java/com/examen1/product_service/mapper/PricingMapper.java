@@ -19,7 +19,7 @@ public class PricingMapper {
                 request.getTipoMoneda() != null ? request.getTipoMoneda() : "PEN"
         );
         pricing.setInicioPrecio(
-                request.getIncioPrecio() != null ? request.getIncioPrecio() : LocalDateTime.now()
+                request.getInicioPrecio() != null ? request.getInicioPrecio() : LocalDateTime.now()
         );
         pricing.setFinPrecio(request.getFinPrecio());
 

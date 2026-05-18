@@ -5,6 +5,7 @@ import com.examen1.product_service.dto.PricingResponse;
 import com.examen1.product_service.mapper.PricingMapper;
 import com.examen1.product_service.model.Pricing;
 import com.examen1.product_service.repository.PricingRepository;
+import com.examen1.product_service.repository.ProductRepository;
 import com.examen1.product_service.service.service.PricingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,16 @@ public class PricingServiceImpl implements PricingService {
 
     private final PricingRepository pricingRepository;
     private final PricingMapper pricingMapper;
+    private final ProductRepository productRepository;
+
 
     @Override
     public PricingResponse create(PricingRequest request) {
-        LocalDateTime startDate = request.getIncioPrecio() != null
-                ? request.getIncioPrecio()
+        productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        LocalDateTime startDate = request.getInicioPrecio() != null
+                ? request.getInicioPrecio()
                 : LocalDateTime.now();
 
         pricingRepository
@@ -65,7 +71,7 @@ public class PricingServiceImpl implements PricingService {
         pricing.setProductId(request.getProductId());
         pricing.setPrecio(request.getPrecio());
         pricing.setTipoMoneda(request.getTipoMoneda());
-        pricing.setInicioPrecio(request.getIncioPrecio());
+        pricing.setInicioPrecio(request.getInicioPrecio());
         pricing.setFinPrecio(request.getFinPrecio());
 
         Pricing updated = pricingRepository.save(pricing);

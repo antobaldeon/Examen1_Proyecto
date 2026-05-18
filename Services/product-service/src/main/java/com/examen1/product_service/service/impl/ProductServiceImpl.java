@@ -19,6 +19,8 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository repository;
     private final ProductMapper mapper;
+    private final PricingService pricingService;
+
 
     @Override
     public ProductResponse create(ProductRequest request) {
@@ -32,15 +34,25 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductResponse> getAll() {
         return repository.findAll()
                 .stream()
-                .map(mapper::toResponse)
+                .map(product -> enrichWithCurrentPrice(mapper.toResponse(product)))
                 .toList();
     }
+
 
     @Override
     public ProductResponse getById(Long id) {
         Product product = findProduct(id);
-        return mapper.toResponse(product);
+        return enrichWithCurrentPrice(mapper.toResponse(product));
+
     }
+    @Override
+    public ProductResponse getByCodigo(String codigo) {
+        Product product = repository.findByCodigo(codigo)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        return enrichWithCurrentPrice(mapper.toResponse(product));
+    }
+
 
     @Override
     public ProductResponse update(Long id, ProductRequest request) {
@@ -67,4 +79,18 @@ public class ProductServiceImpl implements ProductService {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
     }
+
+    private ProductResponse enrichWithCurrentPrice(ProductResponse response) {
+        try {
+            var currentPrice = pricingService.getCurrentPrice(response.getId());
+            response.setPrecio(currentPrice.getPrecio().doubleValue());
+            response.setTipoMoneda(currentPrice.getTipoMoneda());
+        } catch (RuntimeException ex) {
+
+        }
+
+        return response;
+    }
+
+
 }
