@@ -1,0 +1,62 @@
+<div class="login-wrapper">
+
+  <!-- Panel izquierdo -->
+  <div class="login-panel-left">
+
+    <!-- Logo -->
+    <div class="text-center">
+      <div class="itmac-logo-text">ITMAC</div>
+      <div>
+        <span class="itmac-logo-badge">FUTURE</span>
+      </div>
+    </div>
+
+    <p class="login-title">LOGIN</p>
+    <p class="login-subtitle">Ingrese sus datos</p>
+
+    <div class="alert alert-danger w-100" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <form (ngSubmit)="login()" class="w-100">
+
+      <div class="itmac-input-group">
+        <span class="input-icon">👤</span>
+        <input
+          class="itmac-input"
+          type="email"
+          name="email"
+          [(ngModel)]="request.email"
+          placeholder="Username"
+          required
+        />
+      </div>
+
+      <div class="itmac-input-group">
+        <span class="input-icon">🔒</span>
+        <input
+          class="itmac-input"
+          type="password"
+          name="password"
+          [(ngModel)]="request.password"
+          placeholder="Password"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn-itmac">Login Now</button>
+
+    </form>
+
+    <a class="login-reset-link">Restablecer contraseña</a>
+  </div>
+
+  <!-- Panel derecho -->
+  <div class="login-panel-right">
+    <div class="login-promo-card">
+      <p class="login-promo-text">Lo<br>mejor<br>para<br>tu<br>taller!!</p>
+      <img src="/src/app/assets/img/logo.jpg" alt="Deliver" class="login-promo-img" />
+    </div>
+  </div>
+
+</div>

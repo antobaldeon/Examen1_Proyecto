@@ -28,9 +28,4 @@ public class OrderDetail {
     @Column(nullable = false)
     private Double subtotal;
 
-    @Column(nullable = false)
-    private Double igv;
-
-    @Column(nullable = false)
-    private Double total;
 }

@@ -11,6 +11,4 @@ public class OrderDetailResponse {
     private Integer cantidad;
     private Double precioUnitario;
     private Double subtotal;
-    private Double igv;
-    private Double total;
 }
