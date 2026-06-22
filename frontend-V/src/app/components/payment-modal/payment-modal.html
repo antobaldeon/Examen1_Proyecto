@@ -1,0 +1,71 @@
+<!-- FORMULARIO DE PAGO -->
+<div class="modal-backdrop-custom" *ngIf="!pagoConfirmadoOk">
+  <div class="modal-box">
+    <h3 class="text-center mb-3">PAGO</h3>
+<div class="text-center mb-3">
+  <p class="mb-1">Subtotal: S/ {{ subtotal.toFixed(2) }}</p>
+  <p class="mb-1">IGV (18%): S/ {{ igv.toFixed(2) }}</p>
+  <h5>Total a pagar: <strong>S/ {{ montoTotal.toFixed(2) }}</strong></h5>
+</div>
+
+    <div *ngIf="errorPago" class="alert alert-danger">{{ errorPago }}</div>
+
+    <form (ngSubmit)="confirmarPago()">
+      <div class="mb-2">
+        <label>Nombre completo</label>
+        <input class="form-control" required [(ngModel)]="datos.nombreCompleto" name="nombreCompleto">
+      </div>
+      <div class="mb-2">
+        <label>Número de tarjeta</label>
+        <input class="form-control" required [(ngModel)]="datos.numeroTarjeta" name="numeroTarjeta">
+      </div>
+      <div class="row">
+        <div class="col-6 mb-2">
+          <label>Fecha expiración</label>
+          <input class="form-control" placeholder="MM/AA" required [(ngModel)]="datos.fechaExpiracion" name="fechaExpiracion">
+        </div>
+        <div class="col-6 mb-2">
+          <label>CVV</label>
+          <input class="form-control" required [(ngModel)]="datos.codigoSeguridad" name="codigoSeguridad">
+        </div>
+      </div>
+      <div class="mb-2">
+        <label>Teléfono</label>
+        <input class="form-control" required [(ngModel)]="datos.numeroTelefono" name="numeroTelefono">
+      </div>
+      <div class="mb-2">
+        <label>Correo electrónico</label>
+        <input type="email" class="form-control" required [(ngModel)]="datos.correoElectronico" name="correoElectronico">
+      </div>
+      <div class="mb-2">
+        <label>Dirección</label>
+        <input class="form-control" required [(ngModel)]="datos.direccion" name="direccion">
+      </div>
+      <div class="mb-3">
+        <label>Ciudad</label>
+        <input class="form-control" required [(ngModel)]="datos.city" name="city">
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <button type="button" class="btn btn-secondary" (click)="volverAlCarrito()">
+          Volver al carrito
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="enviando">
+          {{ enviando ? 'Procesando...' : 'Confirmar pago' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL DE CONFIRMACIÓN -->
+<div class="modal-backdrop-custom" *ngIf="pagoConfirmadoOk">
+  <div class="modal-box text-center">
+    <h3 class="text-success">✅ Pago confirmado</h3>
+    <p>Pago a nombre de <strong>{{ pagoData?.nombreCompleto }}</strong></p>
+    <p>Correo: {{ pagoData?.correoElectronico }}</p>
+    <p>Fecha de pago: {{ pagoData?.fechaPago }}</p>
+    <p>Estado: <span class="badge bg-success">{{ pagoData?.estado }}</span></p>
+    <button class="btn btn-primary mt-2" (click)="cerrarTodo()">Aceptar</button>
+  </div>
+</div>

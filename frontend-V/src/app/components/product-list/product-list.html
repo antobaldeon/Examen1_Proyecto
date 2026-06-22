@@ -1,0 +1,44 @@
+<div class="container mt-4">
+
+  <div class="mb-4">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar por nombre, categoría o código..."
+      [(ngModel)]="busqueda"
+      (input)="filtrar()">
+  </div>
+
+  <div *ngIf="cargando" class="text-center">
+    <div class="spinner-border" role="status"></div>
+    <p>Cargando productos...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="row" *ngIf="!cargando && !error">
+    <div class="col-md-4 mb-4" *ngFor="let producto of productosFiltrados">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ producto.nombre }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{ producto.categoria }}</h6>
+          <p class="card-text">{{ producto.descripcion }}</p>
+          <p class="card-text"><small class="text-muted">Código: {{ producto.codigo }}</small></p>
+          <p class="card-text">
+            <span class="badge" [ngClass]="producto.estado === 'ACTIVO' ? 'bg-success' : 'bg-secondary'">
+              {{ producto.estado }}
+            </span>
+          </p>
+          <h4 class="text-primary mt-auto">S/ {{ producto.precio.toFixed(2) }}</h4>
+          <button class="btn btn-primary mt-2" (click)="agregarAlCarrito(producto)">
+            Agregar al carrito
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="productosFiltrados.length === 0" class="text-center mt-5">
+      <p>No se encontraron productos.</p>
+    </div>
+  </div>
+</div>
