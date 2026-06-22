@@ -1,15 +1,15 @@
 server:
-  port: 8086
+  port: 8081
 
 spring:
   application:
-    name: order-service
+    name: payment-service
 
   config:
     import: "optional:configserver:http://localhost:8089"
 
   datasource:
-    url: jdbc:mysql://localhost:3307/orders_db
+    url: jdbc:mysql://localhost:3307/payments_db
     username: root
     password: mysql123
 

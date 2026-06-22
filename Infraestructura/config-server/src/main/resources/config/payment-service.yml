@@ -1,5 +1,5 @@
 server:
-  port: 8086
+  port: 8081
 
 spring:
   cloud:
@@ -59,26 +59,26 @@ resilience4j:
   retry:
     instances:
       productService:
-        maxAttempts: 3
-        waitDuration: 1s
+        maxAttempts: 5
+        waitDuration: 10s
 
       inventoryService:
-        maxAttempts: 3
-        waitDuration: 1s
+        maxAttempts: 5
+        waitDuration: 10s
 
   ratelimiter:
     instances:
       productService:
         limitForPeriod: 10
         limitRefreshPeriod: 5s
-        timeoutDuration: 5s
+        timeoutDuration: 10s
         registerHealthIndicator: true
         eventConsumerBufferSize: 100
 
       inventoryService:
         limitForPeriod: 10
         limitRefreshPeriod: 5s
-        timeoutDuration: 5s
+        timeoutDuration: 10s
         registerHealthIndicator: true
         eventConsumerBufferSize: 100
 

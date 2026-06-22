@@ -37,6 +37,15 @@ spring:
               args:
                 name: orderServiceGateway
 
+        - id: payment-service
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/api/v1/payments,/api/v1/payments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: paymentServiceGateway
+
         - id: usuario-service
           uri: lb://USUARIO-SERVICE
           predicates:
