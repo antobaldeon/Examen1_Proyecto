@@ -2,6 +2,7 @@ package com.examen1.order_service.controller;
 
 import com.examen1.order_service.dto.OrderRequest;
 import com.examen1.order_service.dto.OrderResponse;
+import com.examen1.order_service.model.OrderStatus;
 import com.examen1.order_service.service.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -36,5 +37,11 @@ public class OrderController {
         ).build();
     }
 
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Void> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
+        service.updateStatus(id, orderStatus);
+        return ResponseEntity.ok().build();
+    }
 
 }

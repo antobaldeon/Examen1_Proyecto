@@ -9,10 +9,9 @@ spring:
     import: "optional:configserver:http://localhost:8089"
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/testdb
-    username: postgres
-    password: oracle123
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:mysql://localhost:3307/inventory_db
+    username: root
+    password: mysql123
 
   jpa:
     hibernate:
