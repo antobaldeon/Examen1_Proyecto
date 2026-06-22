@@ -1,0 +1,12 @@
+<nav class="navbar navbar-dark bg-dark px-4">
+  <a class="navbar-brand" routerLink="/">🛒 Mi Tienda</a>
+
+  <button class="btn btn-outline-light position-relative" (click)="goToCart()">
+    Carrito
+    <span
+      *ngIf="totalItems > 0"
+      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+      {{ totalItems }}
+    </span>
+  </button>
+</nav>

@@ -1,0 +1,23 @@
+.receipt-box {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.receipt-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  margin-bottom: 0.4rem;
+  color: #444;
+}
+
+.receipt-line.total {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #000;
+}
