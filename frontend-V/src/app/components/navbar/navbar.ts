@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CartService } from '../../services/cart';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-navbar',
@@ -13,7 +14,11 @@ import { CartService } from '../../services/cart';
 export class NavbarComponent implements OnInit {
   totalItems = 0;
 
-  constructor(private cartService: CartService, private router: Router) {}
+  constructor(
+    private cartService: CartService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.cartService.items$.subscribe(() => {
@@ -23,5 +28,23 @@ export class NavbarComponent implements OnInit {
 
   goToCart(): void {
     this.router.navigate(['/cart']);
+  }
+
+  get email(): string {
+    return this.authService.getEmail() ?? '';
+  }
+
+  get roleLabel(): string {
+    return this.authService.getRol() === 'ADMIN' ? 'Administrador' : 'Cliente';
+  }
+
+  get isAdmin(): boolean {
+    return this.authService.getRol() === 'ADMIN';
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.cartService.clearCart();
+    void this.router.navigate(['/login']);
   }
 }

@@ -1,15 +1,33 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Product } from '../models/product.model';
+import { Observable, map } from 'rxjs';
+import { Product, ProductRequest } from '../models/product.model';
+import { API_URL } from '../core/api.config';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  private baseUrl = 'http://localhost:8084/api/v1/products';
+  private readonly baseUrl = `${API_URL}/products`;
 
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Product[]> {
     return this.http.get<Product[]>(this.baseUrl);
+  }
+
+  create(product: ProductRequest): Observable<number> {
+    return this.http.post(this.baseUrl, product, { observe: 'response' }).pipe(
+      map((response) => {
+        const location = response.headers.get('Location');
+        const productId = Number(location?.split('/').pop());
+        if (!location || !Number.isFinite(productId)) {
+          throw new Error('El backend no devolvió el ID del producto.');
+        }
+        return productId;
+      })
+    );
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

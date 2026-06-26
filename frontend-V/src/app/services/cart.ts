@@ -5,11 +5,25 @@ import { Product } from '../models/product.model';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  private itemsSubject = new BehaviorSubject<CartItem[]>([]);
+  private readonly storageKey = 'itmac-cart';
+  private itemsSubject = new BehaviorSubject<CartItem[]>(this.loadItems());
   items$ = this.itemsSubject.asObservable();
 
   private getItems(): CartItem[] {
     return this.itemsSubject.value;
+  }
+
+  private loadItems(): CartItem[] {
+    try {
+      return JSON.parse(localStorage.getItem(this.storageKey) ?? '[]') as CartItem[];
+    } catch {
+      return [];
+    }
+  }
+
+  private setItems(items: CartItem[]): void {
+    localStorage.setItem(this.storageKey, JSON.stringify(items));
+    this.itemsSubject.next(items);
   }
 
   addToCart(product: Product, cantidad: number = 1): void {
@@ -20,11 +34,11 @@ export class CartService {
     } else {
       items.push({ product, cantidad });
     }
-    this.itemsSubject.next(items);
+    this.setItems(items);
   }
 
   removeFromCart(productId: number): void {
-    this.itemsSubject.next(this.getItems().filter(i => i.product.id !== productId));
+    this.setItems(this.getItems().filter(i => i.product.id !== productId));
   }
 
   updateCantidad(productId: number, cantidad: number): void {
@@ -35,7 +49,7 @@ export class CartService {
     const items = this.getItems().map(i =>
       i.product.id === productId ? { ...i, cantidad } : i
     );
-    this.itemsSubject.next(items);
+    this.setItems(items);
   }
 
   getTotalItems(): number {
@@ -47,6 +61,7 @@ export class CartService {
   }
 
   clearCart(): void {
+    localStorage.removeItem(this.storageKey);
     this.itemsSubject.next([]);
   }
 }

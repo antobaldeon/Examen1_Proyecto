@@ -26,6 +26,10 @@ public class Product {
 
     private String estado;
 
+    @Lob
+    @Column(name = "imagen_url", columnDefinition = "LONGTEXT")
+    private String imagenUrl;
+
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
 }

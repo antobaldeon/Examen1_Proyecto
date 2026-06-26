@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PaymentRequest, PaymentResponse } from '../models/payment.model';
+import { API_URL } from '../core/api.config';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
-  private baseUrl = 'http://localhost:8081/api/v1/payments';
+  private readonly baseUrl = `${API_URL}/payments`;
 
   constructor(private http: HttpClient) {}
 

@@ -1,0 +1,35 @@
+<main class="admin-page">
+  <header class="admin-heading">
+    <div>
+      <span>ADMINISTRACIÓN</span>
+      <h1>Panel de control</h1>
+      <p>Gestiona el catálogo y las próximas herramientas de la tienda desde un solo lugar.</p>
+    </div>
+    <a routerLink="/products">Volver a la tienda</a>
+  </header>
+
+  <section class="admin-grid">
+    <a class="admin-option primary" routerLink="/admin/products/new">
+      <div class="option-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm9.2 5.2-2-.7a7.8 7.8 0 0 0 0-1.4l2-.7-1.5-3.5-1.9.9c-.3-.4-.7-.7-1-1l.9-1.9-3.5-1.5-.7 2a7.8 7.8 0 0 0-1.4 0l-.7-2-3.5 1.5.9 1.9c-.4.3-.7.7-1 1l-1.9-.9-1.5 3.5 2 .7a7.8 7.8 0 0 0 0 1.4l-2 .7 1.5 3.5 1.9-.9c.3.4.7.7 1 1l-.9 1.9 3.5 1.5.7-2a7.8 7.8 0 0 0 1.4 0l.7 2 3.5-1.5-.9-1.9c.4-.3.7-.7 1-1l1.9.9 1.5-3.5Z"/>
+        </svg>
+      </div>
+      <div>
+        <small>CATÁLOGO</small>
+        <h2>Agregar producto</h2>
+        <p>Registra datos, imagen, precio y stock inicial.</p>
+      </div>
+      <span class="option-arrow">→</span>
+    </a>
+
+    <article class="admin-option coming-soon">
+      <div class="placeholder-icon">+</div>
+      <div>
+        <small>PRÓXIMAMENTE</small>
+        <h2>Nueva opción</h2>
+        <p>Este espacio queda preparado para futuras funciones administrativas.</p>
+      </div>
+    </article>
+  </section>
+</main>

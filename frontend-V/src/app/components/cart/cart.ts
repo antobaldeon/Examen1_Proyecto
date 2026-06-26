@@ -92,7 +92,7 @@ export class CartComponent implements OnInit {
   }
 
   volver(): void {
-    this.router.navigate(['/']);
+    this.router.navigate(['/products']);
   }
   getSubtotal(): number {
   return this.cartService.getTotalPrecio();
@@ -102,7 +102,16 @@ getIgv(): number {
   return Math.round(this.getSubtotal() * 0.18 * 100) / 100;
 }
 
-getTotalConIgv(): number {
+  getTotalConIgv(): number {
   return Math.round((this.getSubtotal() + this.getIgv()) * 100) / 100;
+}
+
+identificadorVisual(nombre: string): string {
+  return nombre
+    .split(' ')
+    .slice(0, 2)
+    .map((palabra) => palabra.charAt(0))
+    .join('')
+    .toUpperCase();
 }
 }

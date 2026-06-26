@@ -1,0 +1,181 @@
+:host {
+  display: block;
+  min-height: calc(100vh - 76px);
+  background: #f5f5f3;
+  color: #191919;
+}
+
+* { box-sizing: border-box; }
+
+.create-page {
+  max-width: 1250px;
+  margin: auto;
+  padding: clamp(2.5rem, 6vw, 5rem) clamp(1rem, 4vw, 3rem);
+}
+
+.create-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.create-heading span {
+  color: #e51d2a;
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.15em;
+}
+
+.create-heading h1 {
+  margin: 0.4rem 0;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+}
+
+.create-heading p { margin: 0; color: #777; }
+.create-heading a,
+.form-footer a { color: #333; font-size: 0.8rem; font-weight: 750; text-decoration: none; }
+
+.create-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(350px, 0.85fr);
+  gap: 1.25rem;
+}
+
+.form-card,
+.image-card {
+  border: 1px solid #e1e1df;
+  border-radius: 12px;
+  background: #fff;
+  padding: clamp(1.3rem, 3vw, 2rem);
+}
+
+.card-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-heading > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #e51d2a;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.card-heading h2 { margin: 0; font-size: 1.2rem; font-weight: 850; }
+.card-heading p { margin: 0.15rem 0 0; color: #888; font-size: 0.72rem; }
+.card-heading.compact { margin-bottom: 1rem; }
+
+.form-card,
+.image-card,
+.form-card label,
+.image-card label {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-card,
+.image-card { gap: 1rem; }
+.form-card label,
+.image-card label { flex: 1; gap: 0.4rem; color: #444; font-size: 0.75rem; font-weight: 750; }
+.field-row { display: flex; gap: 1rem; }
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid #d5d5d5;
+  border-radius: 7px;
+  outline: 0;
+  background: #fff;
+  padding: 0.8rem;
+  color: #222;
+  font: inherit;
+  font-weight: 400;
+}
+
+input:focus,
+textarea:focus,
+select:focus { border-color: #e51d2a; box-shadow: 0 0 0 3px rgb(229 29 42 / 9%); }
+
+.image-upload {
+  min-height: 285px;
+  display: grid !important;
+  overflow: hidden;
+  place-items: center;
+  border: 1px dashed #bdbdbd;
+  border-radius: 10px;
+  background: #fafafa;
+  cursor: pointer;
+}
+
+.image-upload input { display: none; }
+.image-upload > div { display: flex; align-items: center; flex-direction: column; color: #777; text-align: center; }
+.image-upload svg { width: 54px; margin-bottom: 0.7rem; fill: #e51d2a; }
+.image-upload strong { color: #222; font-size: 0.9rem; }
+.image-upload span { margin-top: 0.25rem; font-size: 0.68rem; font-weight: 400; }
+.image-upload img { width: 100%; height: 285px; object-fit: contain; background: #fff; }
+.image-upload.has-image { border-style: solid; }
+
+.file-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-radius: 7px;
+  background: #f2f2f2;
+  padding: 0.65rem 0.8rem;
+  color: #666;
+  font-size: 0.72rem;
+}
+.file-info span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-info button { border: 0; background: transparent; color: #e51d2a; font-weight: 800; cursor: pointer; }
+
+.inventory-block { margin-top: 0.5rem; border-top: 1px solid #eee; padding-top: 1.3rem; }
+.inventory-block > label { margin-top: 1rem; }
+
+.form-footer {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid #e1e1df;
+  border-radius: 10px;
+  background: #fff;
+  padding: 1rem 1.25rem;
+}
+.form-footer > div { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+.form-footer button {
+  border: 0;
+  border-radius: 7px;
+  background: #e51d2a;
+  padding: 0.85rem 1.3rem;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+.form-footer button:disabled { opacity: 0.6; }
+.form-error { margin: 0; color: #a02029; font-size: 0.78rem; }
+
+@media (max-width: 850px) {
+  .create-layout { grid-template-columns: 1fr; }
+  .create-heading { align-items: flex-start; flex-direction: column; }
+}
+
+@media (max-width: 560px) {
+  .field-row { flex-direction: column; }
+  .form-footer { align-items: stretch; flex-direction: column; }
+  .form-footer > div { justify-content: space-between; margin-left: 0; }
+}
