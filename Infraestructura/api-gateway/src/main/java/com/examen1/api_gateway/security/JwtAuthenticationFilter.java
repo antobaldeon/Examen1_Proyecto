@@ -54,7 +54,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isPublicRoute(String path, String method) {
-        return path.startsWith("/api/v1/auth/login")
+        return "OPTIONS".equals(method)
+                || path.startsWith("/api/v1/auth/login")
                 || path.startsWith("/api/v1/usuarios/register")
                 || ("GET".equals(method) && path.startsWith("/api/v1/products"));
     }

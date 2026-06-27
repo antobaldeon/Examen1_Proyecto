@@ -11,4 +11,5 @@ public class ProductRequest {
     private Double precio;
     private String codigo;
     private String estado;
+    private String imagenUrl;
 }

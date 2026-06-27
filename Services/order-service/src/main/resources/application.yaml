@@ -13,6 +13,7 @@ spring:
     username: root
     password: mysql123
 
+
   jpa:
     hibernate:
       ddl-auto: update

@@ -1,0 +1,94 @@
+<main class="cart-page">
+  <div class="cart-heading">
+    <div>
+      <span>TU PEDIDO</span>
+      <h1>Carrito de compra</h1>
+      <p>Revisa cantidades y productos antes de continuar al pago.</p>
+    </div>
+    <button (click)="volver()">← Seguir comprando</button>
+  </div>
+
+  <section class="empty-cart" *ngIf="items.length === 0">
+    <div class="empty-mark">0</div>
+    <h2>Tu carrito está vacío</h2>
+    <p>Explora el catálogo y agrega los productos que necesita tu taller.</p>
+    <a routerLink="/products">Ir al catálogo</a>
+  </section>
+
+  <div class="cart-layout" *ngIf="items.length > 0">
+    <section class="cart-items">
+      <div class="items-header">
+        <strong>{{ items.length }} {{ items.length === 1 ? 'producto' : 'productos' }}</strong>
+        <span>Los precios incluyen el cálculo de IGV al confirmar.</span>
+      </div>
+
+      <article class="cart-item" *ngFor="let item of items">
+        <div class="item-visual" [class.has-image]="item.product.imagenUrl">
+          <img *ngIf="item.product.imagenUrl" [src]="item.product.imagenUrl" [alt]="item.product.nombre" />
+          <span *ngIf="!item.product.imagenUrl">{{ identificadorVisual(item.product.nombre) }}</span>
+        </div>
+        <div class="item-copy">
+          <small>{{ item.product.categoria }} · {{ item.product.codigo }}</small>
+          <h2>{{ item.product.nombre }}</h2>
+          <p>{{ item.product.descripcion }}</p>
+          <button (click)="quitarProducto(item.product.id)">Quitar</button>
+        </div>
+        <div class="quantity-control">
+          <button
+            aria-label="Reducir cantidad"
+            (click)="cambiarCantidad(item.product.id, item.cantidad - 1)">−</button>
+          <span>{{ item.cantidad }}</span>
+          <button
+            aria-label="Aumentar cantidad"
+            (click)="cambiarCantidad(item.product.id, item.cantidad + 1)">+</button>
+        </div>
+        <div class="item-price">
+          <small>S/ {{ item.product.precio.toFixed(2) }} c/u</small>
+          <strong>S/ {{ (item.product.precio * item.cantidad).toFixed(2) }}</strong>
+        </div>
+      </article>
+    </section>
+
+    <aside class="order-summary">
+      <img src="/itmac-logo.svg" alt="ITMAC Future" />
+      <h2>Resumen del pedido</h2>
+
+      <div class="summary-products">
+        <div *ngFor="let item of items">
+          <span>{{ item.product.nombre }} × {{ item.cantidad }}</span>
+          <strong>S/ {{ (item.product.precio * item.cantidad).toFixed(2) }}</strong>
+        </div>
+      </div>
+
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <strong>S/ {{ getSubtotal().toFixed(2) }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>IGV (18%)</span>
+        <strong>S/ {{ getIgv().toFixed(2) }}</strong>
+      </div>
+      <div class="summary-total">
+        <span>Total</span>
+        <strong>S/ {{ getTotalConIgv().toFixed(2) }}</strong>
+      </div>
+
+      <p class="order-error" *ngIf="errorOrden">{{ errorOrden }}</p>
+
+      <button class="checkout-button" [disabled]="creandoOrden" (click)="realizarPago()">
+        {{ creandoOrden ? 'Preparando pedido...' : 'Continuar al pago' }}
+      </button>
+      <small class="secure-copy">Pago procesado mediante una sesión protegida.</small>
+    </aside>
+  </div>
+</main>
+
+<app-payment-modal
+  *ngIf="mostrarModalPago && orderCreada"
+  [orderId]="orderCreada.id"
+  [montoTotal]="orderCreada.total"
+  [subtotal]="orderCreada.subtotal"
+  [igv]="orderCreada.igv"
+  (cerrar)="cerrarModalPago()"
+  (pagoExitoso)="pagoConfirmado()">
+</app-payment-modal>
