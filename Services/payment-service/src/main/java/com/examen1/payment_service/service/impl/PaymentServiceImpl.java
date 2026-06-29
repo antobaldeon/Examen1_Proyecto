@@ -1,0 +1,68 @@
+package com.examen1.payment_service.service.impl;
+
+import com.examen1.payment_service.client.OrderClient;
+import com.examen1.payment_service.dto.PaymentRequest;
+import com.examen1.payment_service.dto.PaymentResponse;
+import com.examen1.payment_service.mapper.PaymentMapper;
+import com.examen1.payment_service.model.Payment;
+import com.examen1.payment_service.repository.PaymentRepository;
+import com.examen1.payment_service.service.service.PaymentService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+
+@Service
+@RequiredArgsConstructor
+public class PaymentServiceImpl implements PaymentService {
+
+    private final PaymentRepository repository;
+    private final PaymentMapper mapper;
+    private final OrderClient orderClient; // 🚀 Inyectamos el cliente de órdenes
+
+    @Override
+    @Transactional // Usamos transaccionalidad por seguridad del flujo
+    public PaymentResponse processPayment(PaymentRequest request) {
+        // Al ser una simulación académica, validamos reglas básicas locales
+        if (request.getNumeroTarjeta() == null || request.getNumeroTarjeta().length() < 16) {
+            throw new RuntimeException("Número de tarjeta inválido para la simulación.");
+        }
+
+        Payment payment = new Payment();
+        payment.setOrderId(request.getOrderId());
+        payment.setMonto(request.getMonto());
+        payment.setNombreCompleto(request.getNombreCompleto());
+        payment.setNumeroTarjeta(maskCardNumber(request.getNumeroTarjeta())); // Ofuscamos por seguridad simulada
+        payment.setFechaExpiracion(request.getFechaExpiracion());
+        payment.setCodigoSeguridad(request.getCodigoSeguridad());
+        payment.setNumeroTelefono(request.getNumeroTelefono());
+        payment.setCorreoElectronico(request.getCorreoElectronico());
+        payment.setDireccion(request.getDireccion());
+        payment.setCiudad(request.getCity());
+        payment.setFechaPago(LocalDateTime.now());
+
+        // Simulación: Cualquier pago con tarjeta válida se aprueba directamente
+        payment.setEstado("EXITOSO");
+
+        payment = repository.save(payment);
+
+        // 🚀 COMUNICACIÓN ENTRE MICROSERVICIOS:
+        // Le avisamos a order-service que actualice el estado a "PAGADA"
+        orderClient.updateStatus(request.getOrderId(), "PAGADA");
+
+        return mapper.toResponse(payment);
+    }
+
+    @Override
+    public PaymentResponse getPaymentByOrderId(Long orderId) {
+        Payment payment = repository.findByOrderId(orderId)
+                .orElseThrow(() -> new RuntimeException("No se encontró ningún pago para la orden: " + orderId));
+        return mapper.toResponse(payment);
+    }
+
+    // Método utilitario para no guardar la tarjeta en texto plano (Buenas prácticas)
+    private String maskCardNumber(String cardNumber) {
+        return "**** **** **** " + cardNumber.substring(cardNumber.length() - 4);
+    }
+}

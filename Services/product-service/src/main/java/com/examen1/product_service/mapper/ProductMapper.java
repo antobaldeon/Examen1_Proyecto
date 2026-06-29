@@ -16,6 +16,7 @@ public class ProductMapper {
         product.setPrecio(request.getPrecio());
         product.setCodigo(request.getCodigo());
         product.setEstado(request.getEstado());
+        product.setImagenUrl(request.getImagenUrl());
         return product;
     }
 
@@ -28,6 +29,7 @@ public class ProductMapper {
         response.setPrecio(product.getPrecio());
         response.setCodigo(product.getCodigo());
         response.setEstado(product.getEstado());
+        response.setImagenUrl(product.getImagenUrl());
         response.setFechaCreacion(product.getFechaCreacion());
         return response;
     }

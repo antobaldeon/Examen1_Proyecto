@@ -9,11 +9,10 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8762/eureka/
+      defaultZone: http://service-registry:8762/eureka/
   instance:
-    hostname: localhost
-    prefer-ip-address: true
-    ip-address: 127.0.0.1
+    hostname: order-service
+    prefer-ip-address: false
     instance-id: ${spring.application.name}:${server.port}
 
 management:
@@ -59,26 +58,26 @@ resilience4j:
   retry:
     instances:
       productService:
-        maxAttempts: 5
-        waitDuration: 10s
+        maxAttempts: 3
+        waitDuration: 1s
 
       inventoryService:
-        maxAttempts: 5
-        waitDuration: 10s
+        maxAttempts: 3
+        waitDuration: 1s
 
   ratelimiter:
     instances:
       productService:
         limitForPeriod: 10
         limitRefreshPeriod: 5s
-        timeoutDuration: 10s
+        timeoutDuration: 5s
         registerHealthIndicator: true
         eventConsumerBufferSize: 100
 
       inventoryService:
         limitForPeriod: 10
         limitRefreshPeriod: 5s
-        timeoutDuration: 10s
+        timeoutDuration: 5s
         registerHealthIndicator: true
         eventConsumerBufferSize: 100
 

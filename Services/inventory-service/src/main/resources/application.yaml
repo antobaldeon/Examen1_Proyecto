@@ -6,13 +6,12 @@ spring:
     name: inventory-service
 
   config:
-    import: "optional:configserver:http://localhost:8089"
+    import: "optional:configserver:http://config-server:8089/"
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/testdb
-    username: postgres
-    password: oracle123
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:mysql://localhost:3307/inventory_db
+    username: root
+    password: mysql123
 
   jpa:
     hibernate:
@@ -22,10 +21,8 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8762/eureka/
+      defaultZone: http://service-registry:8762/eureka/
 
   instance:
-    hostname: localhost
     prefer-ip-address: true
-    ip-address: 127.0.0.1
     instance-id: ${spring.application.name}:${server.port}

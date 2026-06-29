@@ -1,7 +1,7 @@
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8762/eureka/
+      defaultZone: http://service-registry:8762/eureka/
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${server.port}
@@ -9,6 +9,24 @@ eureka:
 spring:
   cloud:
     gateway:
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost"
+              - "http://localhost:4200"
+              - "http://127.0.0.1"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            exposedHeaders:
+              - Location
+            allowCredentials: true
       routes:
         - id: product-service
           uri: lb://PRODUCT-SERVICE
@@ -37,15 +55,25 @@ spring:
               args:
                 name: orderServiceGateway
 
+        - id: payment-service
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/api/v1/payments,/api/v1/payments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: paymentServiceGateway
+
         - id: usuario-service
           uri: lb://USUARIO-SERVICE
           predicates:
             - Path=/api/v1/usuarios,/api/v1/usuarios/**
 
         - id: auth-service
-          uri: lb://auth-service
+          uri: lb://AUTH-SERVICE
           predicates:
             - Path=/api/v1/auth,/api/v1/auth/**
+
 
 management:
   tracing:

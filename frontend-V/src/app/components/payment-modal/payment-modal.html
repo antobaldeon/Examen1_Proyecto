@@ -1,0 +1,106 @@
+<div class="payment-overlay">
+  <section class="payment-dialog" *ngIf="!pagoConfirmadoOk">
+    <header>
+      <img src="/itmac-logo.svg" alt="ITMAC Future" />
+      <button type="button" (click)="volverAlCarrito()" aria-label="Cerrar">×</button>
+    </header>
+
+    <div class="payment-layout">
+      <div class="payment-form">
+        <span class="step-label">PAGO SEGURO</span>
+        <h2>Completa los datos de pago</h2>
+        <p>La información se usará únicamente para procesar este pedido.</p>
+
+        <div class="payment-error" *ngIf="errorPago">{{ errorPago }}</div>
+
+        <form (ngSubmit)="confirmarPago()">
+          <label>
+            Nombre completo
+            <input required [(ngModel)]="datos.nombreCompleto" name="nombreCompleto" autocomplete="name" />
+          </label>
+          <label>
+            Número de tarjeta
+            <input
+              required
+              [(ngModel)]="datos.numeroTarjeta"
+              name="numeroTarjeta"
+              inputmode="numeric"
+              autocomplete="cc-number"
+              placeholder="0000 0000 0000 0000" />
+          </label>
+          <div class="field-row">
+            <label>
+              Vencimiento
+              <input
+                required
+                [(ngModel)]="datos.fechaExpiracion"
+                name="fechaExpiracion"
+                autocomplete="cc-exp"
+                placeholder="MM/AA" />
+            </label>
+            <label>
+              CVV
+              <input
+                required
+                [(ngModel)]="datos.codigoSeguridad"
+                name="codigoSeguridad"
+                inputmode="numeric"
+                autocomplete="cc-csc"
+                placeholder="000" />
+            </label>
+          </div>
+
+          <div class="form-divider"><span>Datos de contacto</span></div>
+
+          <div class="field-row">
+            <label>
+              Teléfono
+              <input required [(ngModel)]="datos.numeroTelefono" name="numeroTelefono" autocomplete="tel" />
+            </label>
+            <label>
+              Correo
+              <input type="email" required [(ngModel)]="datos.correoElectronico" name="correoElectronico" autocomplete="email" />
+            </label>
+          </div>
+          <label>
+            Dirección
+            <input required [(ngModel)]="datos.direccion" name="direccion" autocomplete="street-address" />
+          </label>
+          <label>
+            Ciudad
+            <input required [(ngModel)]="datos.city" name="city" autocomplete="address-level2" />
+          </label>
+
+          <div class="payment-actions">
+            <button type="button" class="back-button" (click)="volverAlCarrito()">Volver</button>
+            <button type="submit" class="pay-button" [disabled]="enviando">
+              {{ enviando ? 'Procesando...' : 'Pagar S/ ' + montoTotal.toFixed(2) }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <aside class="payment-summary">
+        <span>ORDEN #{{ orderId }}</span>
+        <h3>Resumen</h3>
+        <div><span>Subtotal</span><strong>S/ {{ subtotal.toFixed(2) }}</strong></div>
+        <div><span>IGV (18%)</span><strong>S/ {{ igv.toFixed(2) }}</strong></div>
+        <div class="payment-total"><span>Total</span><strong>S/ {{ montoTotal.toFixed(2) }}</strong></div>
+        <p>Al confirmar aceptas el procesamiento del pedido con los datos ingresados.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="payment-success" *ngIf="pagoConfirmadoOk">
+    <img src="/itmac-logo.svg" alt="ITMAC Future" />
+    <div class="success-check">✓</div>
+    <span>PAGO CONFIRMADO</span>
+    <h2>Tu pedido fue procesado</h2>
+    <p>Enviaremos la confirmación a {{ pagoData?.correoElectronico }}.</p>
+    <div>
+      <small>Estado</small>
+      <strong>{{ pagoData?.estado }}</strong>
+    </div>
+    <button (click)="cerrarTodo()">Volver a la tienda</button>
+  </section>
+</div>

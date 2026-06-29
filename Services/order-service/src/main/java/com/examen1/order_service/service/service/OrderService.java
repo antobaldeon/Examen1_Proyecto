@@ -2,6 +2,7 @@ package com.examen1.order_service.service.service;
 
 import com.examen1.order_service.dto.OrderRequest;
 import com.examen1.order_service.dto.OrderResponse;
+import com.examen1.order_service.model.OrderStatus;
 
 import java.util.List;
 
@@ -12,4 +13,5 @@ public interface OrderService {
     List<OrderResponse> getAll();
 
     OrderResponse getById(Long id);
+    void updateStatus(Long id, OrderStatus status);
 }

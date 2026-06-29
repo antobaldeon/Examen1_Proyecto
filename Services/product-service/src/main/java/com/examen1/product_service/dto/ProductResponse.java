@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
         "precio",
         "codigo",
         "estado",
+        "imagenUrl",
         "fechaCreacion"
 })
 public class ProductResponse {
@@ -24,6 +25,7 @@ public class ProductResponse {
     private String categoria;
     private String codigo;
     private String estado;
+    private String imagenUrl;
     private LocalDateTime fechaCreacion;
 
     private Double precio;

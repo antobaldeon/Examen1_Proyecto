@@ -1,0 +1,28 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: payment-service
+
+  config:
+    import: "optional:configserver:http://config-server:8089/"
+
+  datasource:
+    url: jdbc:mysql://localhost:3307/payments_db
+    username: root
+    password: mysql123
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://service-registry:8762/eureka/
+
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
