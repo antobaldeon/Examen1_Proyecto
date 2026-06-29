@@ -1,6 +1,5 @@
 package examen.usuario_service.dto;
 
-import examen.usuario_service.model.Rol;
 import lombok.Data;
 
 @Data
