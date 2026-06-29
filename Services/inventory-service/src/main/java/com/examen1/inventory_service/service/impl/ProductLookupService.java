@@ -19,7 +19,7 @@ public class ProductLookupService {
         return productClient.findById(productId);
     }
 
-    private Product productFallback(Long productId, Exception ex) {
+    private Product productFallback(Long productId, Throwable ex) {
         Product product = new Product();
         product.setId(productId);
         product.setNombre("Producto no disponible");

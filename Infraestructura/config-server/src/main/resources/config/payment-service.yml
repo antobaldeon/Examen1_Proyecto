@@ -11,8 +11,8 @@ eureka:
     serviceUrl:
       defaultZone: http://service-registry:8762/eureka/
   instance:
-    hostname: localhost
-    prefer-ip-address: true
+    hostname: payment-service
+    prefer-ip-address: false
     instance-id: ${spring.application.name}:${server.port}
 
 management:
