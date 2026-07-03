@@ -30,6 +30,10 @@ public class Product {
     @Column(name = "imagen_url", columnDefinition = "LONGTEXT")
     private String imagenUrl;
 
+    @Lob
+    @Column(name = "imagenes_json", columnDefinition = "LONGTEXT")
+    private String imagenesJson;
+
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
 }

@@ -13,26 +13,26 @@
 
     <form (ngSubmit)="login()" class="login-form">
       <label class="itmac-input-group">
-        <span class="input-icon">✉</span>
+        <span class="input-icon">@</span>
         <input
           class="itmac-input"
           type="email"
           name="email"
           [(ngModel)]="request.email"
-          placeholder="Correo electrónico"
+          placeholder="Correo electronico"
           autocomplete="email"
           required
         />
       </label>
 
       <label class="itmac-input-group">
-        <span class="input-icon">●</span>
+        <span class="input-icon">*</span>
         <input
           class="itmac-input"
           type="password"
           name="password"
           [(ngModel)]="request.password"
-          placeholder="Contraseña"
+          placeholder="Contrasena"
           autocomplete="current-password"
           required
         />
@@ -42,6 +42,11 @@
         {{ enviando ? 'Ingresando...' : 'Ingresar' }}
       </button>
     </form>
+
+    <p class="auth-switch">
+      Primera vez aqui?
+      <a routerLink="/register">Registrese aqui</a>
+    </p>
   </section>
 
   <section class="login-panel-right" aria-hidden="true">

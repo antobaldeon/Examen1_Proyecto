@@ -1,11 +1,11 @@
 <main class="create-page">
   <header class="create-heading">
     <div>
-      <span>ADMINISTRACIÓN / CATÁLOGO</span>
+      <span>ADMINISTRACION / CATALOGO</span>
       <h1>Agregar producto</h1>
-      <p>Registra la información comercial, una imagen y el inventario inicial.</p>
+      <p>Registra la informacion comercial, una galeria de imagenes y el inventario inicial.</p>
     </div>
-    <a routerLink="/admin">← Volver al panel</a>
+    <a routerLink="/admin">Volver al panel</a>
   </header>
 
   <form class="create-layout" (ngSubmit)="guardar()">
@@ -13,8 +13,8 @@
       <div class="card-heading">
         <span>01</span>
         <div>
-          <h2>Información del producto</h2>
-          <p>Estos datos aparecerán en la tienda.</p>
+          <h2>Informacion del producto</h2>
+          <p>Estos datos apareceran en la tienda.</p>
         </div>
       </div>
 
@@ -24,18 +24,21 @@
       </label>
 
       <label>
-        Descripción
+        Descripcion
         <textarea name="descripcion" [(ngModel)]="producto.descripcion" rows="4" required></textarea>
       </label>
 
       <div class="field-row">
         <label>
-          Categoría
+          Categoria
           <input name="categoria" [(ngModel)]="producto.categoria" required />
         </label>
         <label>
-          Código
-          <input name="codigo" [(ngModel)]="producto.codigo" required />
+          Codigo automatico
+          <div class="code-field">
+            <input name="codigo" [(ngModel)]="producto.codigo" required readonly />
+            <button type="button" (click)="regenerarCodigo()">Nuevo</button>
+          </div>
         </label>
       </div>
 
@@ -58,26 +61,37 @@
       <div class="card-heading">
         <span>02</span>
         <div>
-          <h2>Imagen</h2>
-          <p>Se optimizará antes de guardarse.</p>
+          <h2>Imagenes</h2>
+          <p>Se subiran a Google Drive y se guardaran como enlaces.</p>
         </div>
       </div>
 
       <label class="image-upload" [class.has-image]="vistaPrevia">
-        <input type="file" accept="image/jpeg,image/png,image/webp" (change)="seleccionarImagen($event)" />
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          (change)="seleccionarImagen($event)"
+        />
         <img *ngIf="vistaPrevia" [src]="vistaPrevia" alt="Vista previa del producto" />
         <div *ngIf="!vistaPrevia">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M19 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 16H5l3.5-4.5 2.5 3 3.5-4.5L19 19ZM8.5 11A2.5 2.5 0 1 1 8.5 6a2.5 2.5 0 0 1 0 5Z"/>
           </svg>
-          <strong>Seleccionar imagen</strong>
-          <span>JPG, PNG o WebP · máximo 8 MB</span>
+          <strong>Seleccionar imagenes</strong>
+          <span>Hasta 6 imagenes - JPG, PNG o WebP - maximo 8 MB c/u</span>
         </div>
       </label>
 
-      <div class="file-info" *ngIf="nombreArchivo">
-        <span>{{ nombreArchivo }}</span>
-        <button type="button" (click)="quitarImagen()">Quitar</button>
+      <div class="gallery-preview" *ngIf="imagenes.length > 0">
+        <article *ngFor="let image of imagenes; let i = index">
+          <img [src]="image.url" [alt]="image.file.name" />
+          <button type="button" (click)="quitarImagen(i)">Quitar</button>
+        </article>
+      </div>
+
+      <div class="file-info" *ngIf="imagenes.length > 0">
+        <span>{{ nombresArchivos }}</span>
       </div>
 
       <div class="inventory-block">
@@ -93,12 +107,12 @@
             <input type="number" min="0" name="stockActual" [(ngModel)]="inventario.stockActual" required />
           </label>
           <label>
-            Stock mínimo
+            Stock minimo
             <input type="number" min="0" name="stockMinimo" [(ngModel)]="inventario.stockMinimo" required />
           </label>
         </div>
         <label>
-          Ubicación
+          Ubicacion
           <input name="ubicacion" [(ngModel)]="inventario.ubicacion" required />
         </label>
       </div>

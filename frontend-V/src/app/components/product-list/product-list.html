@@ -1,13 +1,13 @@
 <main class="storefront">
   <section class="hero">
     <div class="hero-copy">
-      <span class="eyebrow">REPUESTOS · EQUIPAMIENTO · CONFIANZA</span>
+      <span class="eyebrow">REPUESTOS - EQUIPAMIENTO - CONFIANZA</span>
       <h1>Todo para que tu taller siga avanzando.</h1>
       <p>
         Repuestos y herramientas seleccionados para el trabajo diario.
-        Compra simple, atención directa y precios claros.
+        Compra simple, atencion directa y precios claros.
       </p>
-      <a class="hero-cta" href="#catalogo">Ver catálogo</a>
+      <a class="hero-cta" href="#catalogo">Ver catalogo</a>
     </div>
     <div class="hero-visual">
       <div class="hero-number">01</div>
@@ -23,32 +23,32 @@
   <section class="service-strip" aria-label="Beneficios">
     <article>
       <strong>Compra segura</strong>
-      <span>Tu sesión y tus pedidos están protegidos.</span>
+      <span>Tu sesion y tus pedidos estan protegidos.</span>
     </article>
     <article>
-      <strong>Catálogo especializado</strong>
+      <strong>Catalogo especializado</strong>
       <span>Productos pensados para taller y mantenimiento.</span>
     </article>
     <article>
-      <strong>Atención directa</strong>
-      <span>Información clara antes de confirmar tu compra.</span>
+      <strong>Atencion directa</strong>
+      <span>Informacion clara antes de confirmar tu compra.</span>
     </article>
   </section>
 
   <section class="catalog-section" id="catalogo">
     <div class="section-heading">
       <div>
-        <span class="eyebrow">CATÁLOGO ITMAC</span>
+        <span class="eyebrow">CATALOGO ITMAC</span>
         <h2>Encuentra lo que necesitas</h2>
       </div>
     </div>
 
     <div class="catalog-toolbar" id="categorias">
       <div class="search-box">
-        <span aria-hidden="true">⌕</span>
+        <span aria-hidden="true">#</span>
         <input
           type="search"
-          placeholder="Buscar producto, categoría o código"
+          placeholder="Buscar producto, categoria o codigo"
           [(ngModel)]="busqueda"
           (input)="aplicarFiltros()"
         />
@@ -65,7 +65,7 @@
 
     <div class="status-card" *ngIf="cargando">
       <span class="loader"></span>
-      <p>Cargando catálogo...</p>
+      <p>Cargando catalogo...</p>
     </div>
 
     <div class="status-card error" *ngIf="error">
@@ -88,8 +88,12 @@
           </div>
           <p>{{ producto.descripcion }}</p>
 
+          <a class="detail-link" [routerLink]="['/products', producto.id]">
+            Ver detalle
+          </a>
+
           <div class="admin-stock" *ngIf="esAdmin">
-            <span>Stock: <strong>{{ stockDe(producto.id) ?? '—' }}</strong></span>
+            <span>Stock: <strong>{{ stockDe(producto.id) ?? '-' }}</strong></span>
             <button (click)="reponerStock(producto.id)">+1 unidad</button>
           </div>
 
@@ -102,7 +106,7 @@
               class="add-button"
               [disabled]="producto.estado !== 'ACTIVO'"
               (click)="agregarAlCarrito(producto)">
-              Agregar
+              {{ estaLogueado ? 'Agregar' : 'Iniciar sesion' }}
             </button>
           </div>
 
@@ -115,14 +119,14 @@
 
     <div class="empty-state" *ngIf="!cargando && productosFiltrados.length === 0">
       <strong>No encontramos productos</strong>
-      <p>Prueba con otra categoría o cambia tu búsqueda.</p>
+      <p>Prueba con otra categoria o cambia tu busqueda.</p>
     </div>
   </section>
 
   <section class="contact-strip" id="contacto">
     <img src="/itmac-logo.svg" alt="ITMAC Future" />
     <div>
-      <strong>¿Necesitas ayuda para elegir?</strong>
+      <strong>Necesitas ayuda para elegir?</strong>
       <span>Consulta con nuestro equipo antes de realizar tu pedido.</span>
     </div>
     <a href="mailto:ventas@itmacfuture.com">ventas@itmacfuture.com</a>

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @JsonPropertyOrder({
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
         "codigo",
         "estado",
         "imagenUrl",
+        "imagenesUrls",
         "fechaCreacion"
 })
 public class ProductResponse {
@@ -26,6 +28,7 @@ public class ProductResponse {
     private String codigo;
     private String estado;
     private String imagenUrl;
+    private List<String> imagenesUrls;
     private LocalDateTime fechaCreacion;
 
     private Double precio;

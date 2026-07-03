@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { Product, ProductRequest } from '../models/product.model';
+import { Observable, concatMap, from, map, toArray } from 'rxjs';
+import { ImageUploadResponse, Product, ProductRequest } from '../models/product.model';
 import { API_URL } from '../core/api.config';
 
 @Injectable({ providedIn: 'root' })
@@ -12,6 +12,23 @@ export class ProductService {
 
   getAll(): Observable<Product[]> {
     return this.http.get<Product[]>(this.baseUrl);
+  }
+
+  getById(id: number): Observable<Product> {
+    return this.http.get<Product>(`${this.baseUrl}/${id}`);
+  }
+
+  uploadImage(file: File): Observable<ImageUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ImageUploadResponse>(`${this.baseUrl}/images`, formData);
+  }
+
+  uploadImages(files: File[]): Observable<ImageUploadResponse[]> {
+    return from(files).pipe(
+      concatMap((file) => this.uploadImage(file)),
+      toArray()
+    );
   }
 
   create(product: ProductRequest): Observable<number> {

@@ -1,12 +1,18 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { finalize, switchMap } from 'rxjs';
+import { finalize, of, switchMap } from 'rxjs';
 import { InventoryRequest } from '../../../models/inventory.model';
 import { ProductRequest } from '../../../models/product.model';
 import { InventoryService } from '../../../services/inventory';
 import { ProductService } from '../../../services/product';
+
+interface LocalPreview {
+  file: File;
+  url: string;
+}
 
 @Component({
   selector: 'app-product-create',
@@ -15,25 +21,25 @@ import { ProductService } from '../../../services/product';
   templateUrl: './product-create.html',
   styleUrl: './product-create.css'
 })
-export class ProductCreateComponent {
+export class ProductCreateComponent implements OnDestroy {
   producto: ProductRequest = {
     nombre: '',
     descripcion: '',
     categoria: '',
     precio: 0,
-    codigo: '',
+    codigo: this.generarCodigo(),
     estado: 'ACTIVO',
-    imagenUrl: ''
+    imagenUrl: '',
+    imagenesUrls: []
   };
 
   inventario = {
     stockActual: 10,
     stockMinimo: 3,
-    ubicacion: 'Almacén principal'
+    ubicacion: 'Almacen principal'
   };
 
-  vistaPrevia = '';
-  nombreArchivo = '';
+  imagenes: LocalPreview[] = [];
   guardando = false;
   error = '';
 
@@ -43,33 +49,63 @@ export class ProductCreateComponent {
     private router: Router
   ) {}
 
-  seleccionarImagen(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    this.error = '';
-
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      this.error = 'Selecciona una imagen JPG, PNG o WebP.';
-      input.value = '';
-      return;
-    }
-    if (file.size > 8 * 1024 * 1024) {
-      this.error = 'La imagen original no puede superar 8 MB.';
-      input.value = '';
-      return;
-    }
-
-    this.nombreArchivo = file.name;
-    const reader = new FileReader();
-    reader.onload = () => this.optimizarImagen(String(reader.result));
-    reader.readAsDataURL(file);
+  ngOnDestroy(): void {
+    this.imagenes.forEach((image) => URL.revokeObjectURL(image.url));
   }
 
-  quitarImagen(): void {
-    this.vistaPrevia = '';
-    this.nombreArchivo = '';
+  get vistaPrevia(): string {
+    return this.imagenes[0]?.url ?? '';
+  }
+
+  get nombresArchivos(): string {
+    return this.imagenes.map((image) => image.file.name).join(', ');
+  }
+
+  seleccionarImagen(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    this.error = '';
+
+    if (files.length === 0) return;
+    if (this.imagenes.length + files.length > 6) {
+      this.error = 'Puedes subir hasta 6 imagenes por producto.';
+      input.value = '';
+      return;
+    }
+
+    const invalid = files.find((file) => !file.type.startsWith('image/'));
+    if (invalid) {
+      this.error = 'Selecciona solo imagenes JPG, PNG o WebP.';
+      input.value = '';
+      return;
+    }
+
+    const tooLarge = files.find((file) => file.size > 8 * 1024 * 1024);
+    if (tooLarge) {
+      this.error = 'Cada imagen no puede superar 8 MB.';
+      input.value = '';
+      return;
+    }
+
+    this.imagenes = [
+      ...this.imagenes,
+      ...files.map((file) => ({ file, url: URL.createObjectURL(file) }))
+    ];
     this.producto.imagenUrl = '';
+    this.producto.imagenesUrls = [];
+    input.value = '';
+  }
+
+  quitarImagen(index: number): void {
+    const image = this.imagenes[index];
+    if (image) {
+      URL.revokeObjectURL(image.url);
+    }
+    this.imagenes = this.imagenes.filter((_, currentIndex) => currentIndex !== index);
+  }
+
+  regenerarCodigo(): void {
+    this.producto.codigo = this.generarCodigo();
   }
 
   guardar(): void {
@@ -80,9 +116,18 @@ export class ProductCreateComponent {
     }
 
     this.guardando = true;
-    this.productService
-      .create(this.producto)
+    const upload$ = this.imagenes.length > 0
+      ? this.productService.uploadImages(this.imagenes.map((image) => image.file))
+      : of([]);
+
+    upload$
       .pipe(
+        switchMap((images) => {
+          const urls = images.map((image) => image.imageUrl).filter(Boolean);
+          this.producto.imagenesUrls = urls;
+          this.producto.imagenUrl = urls[0] ?? '';
+          return this.productService.create(this.producto);
+        }),
         switchMap((productId) => {
           const inventory: InventoryRequest = { productId, ...this.inventario };
           return this.inventoryService.create(inventory);
@@ -91,42 +136,15 @@ export class ProductCreateComponent {
       )
       .subscribe({
         next: () => void this.router.navigate(['/products']),
-        error: () => {
-          this.error = 'No se pudo guardar. Revisa que el código no esté repetido y que los servicios estén activos.';
+        error: (error: unknown) => {
+          this.error = this.mensajeError(error);
         }
       });
   }
 
-  private optimizarImagen(dataUrl: string): void {
-    const image = new Image();
-    image.onload = () => {
-      const maxSize = 800;
-      const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(image.width * scale);
-      canvas.height = Math.round(image.height * scale);
-
-      const context = canvas.getContext('2d');
-      if (!context) {
-        this.error = 'No se pudo procesar la imagen.';
-        return;
-      }
-
-      context.fillStyle = '#ffffff';
-      context.fillRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      const optimized = canvas.toDataURL('image/webp', 0.72);
-
-      if (optimized.length > 500_000) {
-        this.error = 'La imagen sigue siendo demasiado pesada. Usa una fotografía más pequeña.';
-        this.quitarImagen();
-        return;
-      }
-
-      this.vistaPrevia = optimized;
-      this.producto.imagenUrl = optimized;
-    };
-    image.src = dataUrl;
+  private generarCodigo(): string {
+    const random = crypto.getRandomValues(new Uint32Array(1))[0].toString(36).toUpperCase().slice(0, 6);
+    return `ITM-${random.padEnd(6, '0')}`;
   }
 
   private formularioValido(): boolean {
@@ -140,5 +158,35 @@ export class ProductCreateComponent {
         this.inventario.stockMinimo >= 0 &&
         this.inventario.ubicacion.trim()
     );
+  }
+
+  private mensajeError(error: unknown): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return error instanceof Error
+        ? `No se pudo guardar. ${error.message}`
+        : 'No se pudo guardar. Error desconocido.';
+    }
+    if (error.status === 0) {
+      return 'No se pudo conectar con el API Gateway. Revisa que api-gateway este activo.';
+    }
+    if (error.url?.includes('/inventory') && (error.status === 503 || error.status === 504)) {
+      return 'El producto se creo, pero inventario no respondio. Reinicia inventory-service y revisa que pueda consultar product-service en localhost:8084.';
+    }
+    if (error.url?.includes('/inventory')) {
+      return 'El producto se creo, pero no se pudo crear su inventario inicial.';
+    }
+    if (error.url?.includes('/images') && (error.status === 503 || error.status === 504)) {
+      return 'El gateway corto la subida de imagen. Reinicia api-gateway para cargar la ruta especial de imagenes.';
+    }
+    if (error.url?.includes('/images')) {
+      return 'No se pudo subir la imagen a Google Drive. Revisa credenciales, carpeta compartida y Drive API.';
+    }
+    if (error.status === 401 || error.status === 403) {
+      return 'Tu sesion no tiene permiso de administrador o expiro. Vuelve a iniciar sesion.';
+    }
+    if (error.status === 409 || error.status === 500) {
+      return 'No se pudo guardar. Puede ser codigo repetido, Drive mal configurado o un servicio caido.';
+    }
+    return `No se pudo guardar. Error ${error.status}.`;
   }
 }

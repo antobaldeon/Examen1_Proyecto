@@ -319,6 +319,15 @@
 }
 .product-title span.inactive { background: #eee; color: #777; }
 .product-content > p { min-height: 44px; margin: 0.65rem 0 1.1rem; color: #6d6d6d; font-size: 0.82rem; line-height: 1.5; }
+.detail-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #e51d2a;
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+.detail-link:hover { text-decoration: underline; }
 .product-footer { border-top: 1px solid #eee; padding-top: 1rem; }
 .product-footer > div { display: flex; flex-direction: column; }
 .product-footer small { color: #888; font-size: 0.68rem; }

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { Inventory } from '../../models/inventory.model';
 import { Product } from '../../models/product.model';
 import { AuthService } from '../../services/auth';
@@ -11,7 +12,7 @@ import { ProductService } from '../../services/product';
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './product-list.html',
   styleUrl: './product-list.css'
 })
@@ -29,7 +30,8 @@ export class ProductListComponent implements OnInit {
     private productService: ProductService,
     private inventoryService: InventoryService,
     private cartService: CartService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -38,6 +40,10 @@ export class ProductListComponent implements OnInit {
 
   get esAdmin(): boolean {
     return this.authService.getRol() === 'ADMIN';
+  }
+
+  get estaLogueado(): boolean {
+    return this.authService.isLoggedIn();
   }
 
   get categorias(): string[] {
@@ -55,7 +61,7 @@ export class ProductListComponent implements OnInit {
         if (this.esAdmin) this.cargarInventario();
       },
       error: () => {
-        this.error = 'No pudimos cargar el catálogo. Revisa que product-service esté disponible.';
+        this.error = 'No pudimos cargar el catalogo. Revisa que product-service este disponible.';
         this.cargando = false;
       }
     });
@@ -89,8 +95,14 @@ export class ProductListComponent implements OnInit {
   }
 
   agregarAlCarrito(producto: Product): void {
+    if (!this.estaLogueado) {
+      this.mostrarMensaje('Inicia sesion para agregar productos al carrito.');
+      void this.router.navigate(['/login']);
+      return;
+    }
+
     this.cartService.addToCart(producto);
-    this.mostrarMensaje(`${producto.nombre} se agregó al carrito.`);
+    this.mostrarMensaje(`${producto.nombre} se agrego al carrito.`);
   }
 
   reponerStock(productId: number): void {
@@ -98,14 +110,14 @@ export class ProductListComponent implements OnInit {
       next: (inventory) => {
         this.inventario.set(productId, inventory);
         this.inventario = new Map(this.inventario);
-        this.mostrarMensaje('Se agregó una unidad al inventario.');
+        this.mostrarMensaje('Se agrego una unidad al inventario.');
       },
       error: () => (this.error = 'No se pudo actualizar el stock.')
     });
   }
 
   eliminarProducto(producto: Product): void {
-    if (!confirm(`¿Eliminar "${producto.nombre}" del catálogo?`)) return;
+    if (!confirm(`Eliminar "${producto.nombre}" del catalogo?`)) return;
 
     this.productService.delete(producto.id).subscribe({
       next: () => {

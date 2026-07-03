@@ -1,22 +1,26 @@
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://service-registry:8762/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8762/eureka/}
   instance:
-    prefer-ip-address: true
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:true}
     instance-id: ${spring.application.name}:${server.port}
 
 spring:
   cloud:
     gateway:
+      httpclient:
+        response-timeout: 120s
+        connect-timeout: 10000
       globalcors:
         add-to-simple-url-handler-mapping: true
         cors-configurations:
           '[/**]':
-            allowedOrigins:
+            allowedOriginPatterns:
               - "http://localhost"
-              - "http://localhost:4200"
+              - "http://localhost:*"
               - "http://127.0.0.1"
+              - "http://127.0.0.1:*"
             allowedMethods:
               - GET
               - POST
@@ -28,6 +32,15 @@ spring:
               - Location
             allowCredentials: true
       routes:
+        - id: product-image-upload
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/api/v1/products/images
+          order: -1
+          metadata:
+            response-timeout: 120000
+            connect-timeout: 10000
+
         - id: product-service
           uri: lb://PRODUCT-SERVICE
           predicates:
@@ -36,6 +49,16 @@ spring:
             - name: CircuitBreaker
               args:
                 name: productServiceGateway
+
+        - id: inventory-create
+          uri: lb://INVENTORY-SERVICE
+          predicates:
+            - Path=/api/v1/inventory
+            - Method=POST
+          order: -1
+          metadata:
+            response-timeout: 120000
+            connect-timeout: 10000
 
         - id: inventory-service
           uri: lb://INVENTORY-SERVICE
@@ -80,7 +103,7 @@ management:
     sampling:
       probability: 1.0
   health:
-      circuitbreakers:
+    circuitbreakers:
       enabled: true
   endpoints:
     web:

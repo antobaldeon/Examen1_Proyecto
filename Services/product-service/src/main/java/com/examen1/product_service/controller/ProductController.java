@@ -2,6 +2,8 @@ package com.examen1.product_service.controller;
 
 import com.examen1.product_service.dto.ProductRequest;
 import com.examen1.product_service.dto.ProductResponse;
+import com.examen1.product_service.dto.ImageUploadResponse;
+import com.examen1.product_service.service.service.ImageStorageService;
 import com.examen1.product_service.service.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +12,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.util.List;
@@ -22,6 +25,7 @@ import java.util.Map;
 public class ProductController {
 
     private final ProductService service;
+    private final ImageStorageService imageStorageService;
     private final DiscoveryClient discoveryClient;
 
     @Value("${server.port}")
@@ -77,6 +81,12 @@ public class ProductController {
         return ResponseEntity.created(
                 URI.create("/api/v1/products/" + response.getId())
         ).build();
+    }
+
+    @PostMapping("/images")
+    public ResponseEntity<ImageUploadResponse> uploadImage(@RequestParam("file") MultipartFile file) {
+        logRequest("POST /api/v1/products/images");
+        return ResponseEntity.ok(imageStorageService.uploadProductImage(file));
     }
 
     @PutMapping("/{id}")

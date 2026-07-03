@@ -2,6 +2,8 @@ package com.examen1.product_service.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ProductRequest {
 
@@ -12,4 +14,5 @@ public class ProductRequest {
     private String codigo;
     private String estado;
     private String imagenUrl;
+    private List<String> imagenesUrls;
 }

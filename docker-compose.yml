@@ -12,6 +12,7 @@ services:
       - "8089:8089"
     environment:
       - SPRING_PROFILES_ACTIVE=native
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8762/eureka/
     networks:
       - spring-cloud-network
     healthcheck:
@@ -49,8 +50,10 @@ services:
       - "8061:8061"
     environment:
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8089
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8762/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=api-gateway
       - JAVA_TOOL_OPTIONS=-Deureka.client.serviceUrl.defaultZone=http://service-registry:8762/eureka/
-      - SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS_CONFIGURATIONS_[/**]_ALLOWEDORIGINS=http://localhost,http://localhost:4200,http://127.0.0.1
+      - SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS_CONFIGURATIONS_[/**]_ALLOWEDORIGINPATTERNS=http://localhost,http://localhost:*,http://127.0.0.1,http://127.0.0.1:*
       - SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS_CONFIGURATIONS_[/**]_ALLOWEDMETHODS=GET,POST,PUT,DELETE,OPTIONS
       - SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS_CONFIGURATIONS_[/**]_ALLOWEDHEADERS=*
       - SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS_CONFIGURATIONS_[/**]_ALLOWCREDENTIALS=true
@@ -71,11 +74,13 @@ services:
       - "8088:8088"
     environment:
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8089
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8762/eureka/
       - JAVA_TOOL_OPTIONS=-Deureka.client.serviceUrl.defaultZone=http://service-registry:8762/eureka/
       - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3307/usuario_db?allowPublicKeyRetrieval=true&useSSL=false
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=mysql123
       - EUREKA_INSTANCE_PREFER_IP_ADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=auth-service
     depends_on:
       config-server:
         condition: service_healthy
@@ -95,11 +100,13 @@ services:
       - "8087:8087"
     environment:
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8089
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8762/eureka/
       - JAVA_TOOL_OPTIONS=-Deureka.client.serviceUrl.defaultZone=http://service-registry:8762/eureka/
       - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3307/usuario_db?allowPublicKeyRetrieval=true&useSSL=false
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=mysql123
       - EUREKA_INSTANCE_PREFER_IP_ADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=usuario-service
     depends_on:
       config-server:
         condition: service_healthy
@@ -119,11 +126,21 @@ services:
       - "8084:8084"
     environment:
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8089
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8762/eureka/
       - JAVA_TOOL_OPTIONS=-Deureka.client.serviceUrl.defaultZone=http://service-registry:8762/eureka/
       - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3307/product_db?allowPublicKeyRetrieval=true&useSSL=false
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=mysql123
       - EUREKA_INSTANCE_PREFER_IP_ADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=product-service
+      - GOOGLE_DRIVE_ENABLED=${GOOGLE_DRIVE_ENABLED:-false}
+      - GOOGLE_DRIVE_FOLDER_ID=${GOOGLE_DRIVE_FOLDER_ID:-}
+      - GOOGLE_DRIVE_CREDENTIALS_PATH=${GOOGLE_DRIVE_CREDENTIALS_PATH:-}
+      - GOOGLE_DRIVE_AUTH_MODE=${GOOGLE_DRIVE_AUTH_MODE:-service-account}
+      - GOOGLE_DRIVE_OAUTH_CLIENT_ID=${GOOGLE_DRIVE_OAUTH_CLIENT_ID:-}
+      - GOOGLE_DRIVE_OAUTH_CLIENT_SECRET=${GOOGLE_DRIVE_OAUTH_CLIENT_SECRET:-}
+      - GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN=${GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN:-}
+      - GOOGLE_DRIVE_PUBLIC_IMAGES=${GOOGLE_DRIVE_PUBLIC_IMAGES:-true}
     depends_on:
       config-server:
         condition: service_healthy
@@ -143,11 +160,14 @@ services:
       - "8085:8085"
     environment:
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8089
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8762/eureka/
       - JAVA_TOOL_OPTIONS=-Deureka.client.serviceUrl.defaultZone=http://service-registry:8762/eureka/
       - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3307/inventory_db?allowPublicKeyRetrieval=true&useSSL=false
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=mysql123
       - EUREKA_INSTANCE_PREFER_IP_ADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=inventory-service
+      - PRODUCT_SERVICE_URL=http://product-service:8084
     depends_on:
       config-server:
         condition: service_healthy
@@ -167,11 +187,13 @@ services:
       - "8086:8086"
     environment:
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8089
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8762/eureka/
       - JAVA_TOOL_OPTIONS=-Deureka.client.serviceUrl.defaultZone=http://service-registry:8762/eureka/
       - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3307/orders_db?allowPublicKeyRetrieval=true&useSSL=false
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=mysql123
       - EUREKA_INSTANCE_PREFER_IP_ADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=order-service
     depends_on:
       config-server:
         condition: service_healthy
@@ -191,11 +213,13 @@ services:
       - "8081:8081"
     environment:
       - SPRING_CLOUD_CONFIG_URI=http://config-server:8089
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8762/eureka/
       - JAVA_TOOL_OPTIONS=-Deureka.client.serviceUrl.defaultZone=http://service-registry:8762/eureka/
       - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3307/payments_db?allowPublicKeyRetrieval=true&useSSL=false
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=mysql123
       - EUREKA_INSTANCE_PREFER_IP_ADDRESS=false
+      - EUREKA_INSTANCE_HOSTNAME=payment-service
     depends_on:
       config-server:
         condition: service_healthy

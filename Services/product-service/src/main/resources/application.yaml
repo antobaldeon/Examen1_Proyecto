@@ -6,7 +6,7 @@ spring:
     name: product-service
 
   config:
-    import: "optional:configserver:http://config-server:8089/"
+    import: "optional:file:C:/Users/mygna/OneDrive/Escritorio/itmac future de antonella/Services/product-service/google-drive-oauth.properties,optional:file:./google-drive-oauth.properties,optional:configserver:${SPRING_CLOUD_CONFIG_URI:http://localhost:8089}/"
 
   datasource:
     url: jdbc:mysql://localhost:3307/product_db
@@ -18,10 +18,27 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 8MB
+
+google:
+  drive:
+    enabled: ${GOOGLE_DRIVE_ENABLED:true}
+    folder-id: ${GOOGLE_DRIVE_FOLDER_ID:15Dbbtu0UvmawOs0Wrmsgqmo79tzmsiQq}
+    credentials-path: ${GOOGLE_DRIVE_CREDENTIALS_PATH:C:/Users/mygna/Downloads/project-9ec6f28f-ed34-43cd-92e-76acecbe8a4b.json}
+    auth-mode: ${GOOGLE_DRIVE_AUTH_MODE:oauth}
+    public-images: ${GOOGLE_DRIVE_PUBLIC_IMAGES:true}
+    oauth:
+      client-id: ${GOOGLE_DRIVE_OAUTH_CLIENT_ID:}
+      client-secret: ${GOOGLE_DRIVE_OAUTH_CLIENT_SECRET:}
+      refresh-token: ${GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN:}
+
 eureka:
   client:
     service-url:
-      defaultZone: http://service-registry:8762/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8762/eureka/}
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${server.port}

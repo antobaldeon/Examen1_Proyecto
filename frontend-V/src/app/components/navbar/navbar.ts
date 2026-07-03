@@ -13,6 +13,7 @@ import { AuthService } from '../../services/auth';
 })
 export class NavbarComponent implements OnInit {
   totalItems = 0;
+  accountMenuOpen = false;
 
   constructor(
     private cartService: CartService,
@@ -26,8 +27,8 @@ export class NavbarComponent implements OnInit {
     });
   }
 
-  goToCart(): void {
-    this.router.navigate(['/cart']);
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
   }
 
   get email(): string {
@@ -42,9 +43,23 @@ export class NavbarComponent implements OnInit {
     return this.authService.getRol() === 'ADMIN';
   }
 
+  toggleAccountMenu(): void {
+    this.accountMenuOpen = !this.accountMenuOpen;
+  }
+
+  goToCart(): void {
+    if (!this.isLoggedIn) {
+      void this.router.navigate(['/login']);
+      return;
+    }
+
+    void this.router.navigate(['/cart']);
+  }
+
   logout(): void {
     this.authService.logout();
     this.cartService.clearCart();
-    void this.router.navigate(['/login']);
+    this.accountMenuOpen = false;
+    void this.router.navigate(['/']);
   }
 }

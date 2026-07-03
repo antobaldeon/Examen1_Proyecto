@@ -6,7 +6,7 @@ spring:
     name: payment-service
 
   config:
-    import: "optional:configserver:http://config-server:8089/"
+    import: "optional:configserver:${SPRING_CLOUD_CONFIG_URI:http://localhost:8089}/"
 
   datasource:
     url: jdbc:mysql://localhost:3307/payments_db
@@ -21,7 +21,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://service-registry:8762/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8762/eureka/}
 
   instance:
     prefer-ip-address: true

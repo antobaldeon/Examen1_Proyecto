@@ -29,10 +29,12 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RuntimeException("El email ya está registrado");
         }
 
-        String nombreRol = request.getRol() != null ? request.getRol() : "CLIENTE";
-
-        Rol rol = rolRepository.findByNombre(nombreRol)
-                .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + nombreRol));
+        Rol rol = rolRepository.findByNombre("CLIENTE")
+                .orElseGet(() -> {
+                    Rol nuevoRol = new Rol();
+                    nuevoRol.setNombre("CLIENTE");
+                    return rolRepository.save(nuevoRol);
+                });
 
         Usuario usuario = usuarioMapper.toEntity(request);
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));

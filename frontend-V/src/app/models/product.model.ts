@@ -9,6 +9,7 @@ export interface Product {
   fechaCreacion?: string;
   tipoMoneda?: string;
   imagenUrl?: string;
+  imagenesUrls?: string[];
 }
 
 export interface ProductRequest {
@@ -19,4 +20,11 @@ export interface ProductRequest {
   codigo: string;
   estado: string;
   imagenUrl?: string;
+  imagenesUrls?: string[];
+}
+
+export interface ImageUploadResponse {
+  fileId: string;
+  imageUrl: string;
+  webViewLink: string;
 }

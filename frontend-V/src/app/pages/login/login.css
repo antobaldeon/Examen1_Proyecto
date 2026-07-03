@@ -51,7 +51,8 @@
 }
 
 .login-form,
-.login-error {
+.login-error,
+.auth-switch {
   width: 100%;
   max-width: 360px;
 }
@@ -123,6 +124,23 @@
 .btn-itmac:disabled {
   cursor: wait;
   opacity: 0.65;
+}
+
+.auth-switch {
+  margin: 1rem 0 0;
+  color: #555;
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.auth-switch a {
+  color: var(--itmac-red);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
 }
 
 .login-panel-right {
