@@ -6,6 +6,7 @@ import { CartService } from '../../services/cart';
 import { OrderService } from '../../services/order';
 import { OrderRequest, OrderResponse } from '../../models/order.model';
 import { PaymentModalComponent } from '../payment-modal/payment-modal';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-cart',
@@ -17,17 +18,23 @@ import { PaymentModalComponent } from '../payment-modal/payment-modal';
 export class CartComponent implements OnInit {
   items: CartItem[] = [];
   mostrarModalPago = false;
-  orderCreada: OrderResponse | null = null; // 👈 ahora guardamos la orden completa
+  orderCreada: OrderResponse | null = null;
   creandoOrden = false;
   errorOrden: string | null = null;
 
   constructor(
     private cartService: CartService,
     private orderService: OrderService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    if (this.authService.isAdmin()) {
+      void this.router.navigate(['/admin']);
+      return;
+    }
+
     this.cartService.items$.subscribe(items => this.items = items);
   }
 
@@ -40,17 +47,32 @@ export class CartComponent implements OnInit {
   }
 
   getTotal(): number {
-    return this.cartService.getTotalPrecio(); // estimado sin IGV, solo referencial mientras compra
+    return this.cartService.getTotalPrecio();
   }
 
   realizarPago(): void {
     if (this.items.length === 0) return;
 
+    if (!this.authService.isLoggedIn()) {
+      void this.router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+      return;
+    }
+
+    if (this.authService.isAdmin()) {
+      this.errorOrden = 'Los administradores no pueden realizar compras.';
+      return;
+    }
+
     this.creandoOrden = true;
     this.errorOrden = null;
 
+    const email = this.authService.getEmail() ?? '';
+
     const orderRequest: OrderRequest = {
       tipo: 'SALIDA',
+      usuarioId: this.authService.getUserId() ?? undefined,
+      usuarioNombre: this.authService.getNombre() || email.split('@')[0],
+      usuarioEmail: email,
       detalles: this.items.map(i => ({
         productId: i.product.id,
         cantidad: i.cantidad
@@ -59,7 +81,6 @@ export class CartComponent implements OnInit {
 
     this.orderService.createOrder(orderRequest).subscribe({
       next: (orderId) => {
-        // 👇 Una vez creada, pedimos el detalle real con subtotal/igv/total calculados por el backend
         this.orderService.getById(orderId).subscribe({
           next: (orderResponse) => {
             this.orderCreada = orderResponse;
@@ -94,24 +115,25 @@ export class CartComponent implements OnInit {
   volver(): void {
     this.router.navigate(['/products']);
   }
-  getSubtotal(): number {
-  return this.cartService.getTotalPrecio();
-}
 
-getIgv(): number {
-  return Math.round(this.getSubtotal() * 0.18 * 100) / 100;
-}
+  getSubtotal(): number {
+    return this.cartService.getTotalPrecio();
+  }
+
+  getIgv(): number {
+    return Math.round(this.getSubtotal() * 0.18 * 100) / 100;
+  }
 
   getTotalConIgv(): number {
-  return Math.round((this.getSubtotal() + this.getIgv()) * 100) / 100;
-}
+    return Math.round((this.getSubtotal() + this.getIgv()) * 100) / 100;
+  }
 
-identificadorVisual(nombre: string): string {
-  return nombre
-    .split(' ')
-    .slice(0, 2)
-    .map((palabra) => palabra.charAt(0))
-    .join('')
-    .toUpperCase();
-}
+  identificadorVisual(nombre: string): string {
+    return nombre
+      .split(' ')
+      .slice(0, 2)
+      .map((palabra) => palabra.charAt(0))
+      .join('')
+      .toUpperCase();
+  }
 }

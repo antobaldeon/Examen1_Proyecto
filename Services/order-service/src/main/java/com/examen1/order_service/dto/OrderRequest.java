@@ -7,6 +7,14 @@ import java.util.List;
 
 @Data
 public class OrderRequest {
+
     private OrderType tipo;
+
+    private Long usuarioId;
+
+    private String usuarioNombre;
+
+    private String usuarioEmail;
+
     private List<OrderDetailRequest> detalles;
 }

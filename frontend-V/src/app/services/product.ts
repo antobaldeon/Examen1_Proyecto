@@ -14,17 +14,27 @@ export class ProductService {
     return this.http.get<Product[]>(this.baseUrl);
   }
 
+  getById(id: number): Observable<Product> {
+    return this.http.get<Product>(`${this.baseUrl}/${id}`);
+  }
+
   create(product: ProductRequest): Observable<number> {
     return this.http.post(this.baseUrl, product, { observe: 'response' }).pipe(
       map((response) => {
         const location = response.headers.get('Location');
         const productId = Number(location?.split('/').pop());
+
         if (!location || !Number.isFinite(productId)) {
-          throw new Error('El backend no devolvió el ID del producto.');
+          throw new Error('El backend no devolvio el ID del producto.');
         }
+
         return productId;
       })
     );
+  }
+
+  update(id: number, product: ProductRequest): Observable<Product> {
+    return this.http.put<Product>(`${this.baseUrl}/${id}`, product);
   }
 
   delete(id: number): Observable<void> {

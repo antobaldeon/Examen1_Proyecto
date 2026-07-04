@@ -29,10 +29,10 @@ public class AuthServiceImpl implements AuthService {
         AuthResponse response = new AuthResponse();
         response.setToken(jwtService.generateToken(usuario));
         response.setUserId(usuario.getId());
+        response.setNombre(usuario.getNombre());
         response.setEmail(usuario.getEmail());
         response.setRol(usuario.getRol());
 
         return response;
     }
-
 }

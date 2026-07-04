@@ -1,9 +1,11 @@
 export interface Inventory {
   id: number;
   productId: number;
+  productName?: string;
   stockActual: number;
   stockMinimo: number;
   ubicacion: string;
+  estado?: string;
   fechaActualizacion?: string;
 }
 

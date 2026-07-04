@@ -2,11 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_URL } from '../core/api.config';
-import { AuthResponse, LoginRequest } from '../models/auth.model';
+import { AuthResponse, LoginRequest, RegisterRequest, UsuarioResponse } from '../models/auth.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly baseUrl = `${API_URL}/auth`;
+  private readonly usersUrl = `${API_URL}/usuarios`;
   private readonly tokenKey = 'token';
 
   constructor(private http: HttpClient) {}
@@ -15,9 +16,17 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.baseUrl}/login`, request);
   }
 
+  register(request: RegisterRequest): Observable<UsuarioResponse> {
+    return this.http.post<UsuarioResponse>(`${this.usersUrl}/register`, {
+      ...request,
+      rol: 'CLIENTE'
+    });
+  }
+
   saveSession(response: AuthResponse): void {
     localStorage.setItem(this.tokenKey, response.token);
     localStorage.setItem('userId', String(response.userId));
+    localStorage.setItem('nombre', response.nombre ?? '');
     localStorage.setItem('email', response.email);
     localStorage.setItem('rol', response.rol);
   }
@@ -26,12 +35,25 @@ export class AuthService {
     return localStorage.getItem(this.tokenKey);
   }
 
+  getUserId(): number | null {
+    const value = localStorage.getItem('userId');
+    return value ? Number(value) : null;
+  }
+
+  getNombre(): string | null {
+    return localStorage.getItem('nombre');
+  }
+
   getEmail(): string | null {
     return localStorage.getItem('email');
   }
 
   getRol(): string | null {
     return localStorage.getItem('rol');
+  }
+
+  isAdmin(): boolean {
+    return this.getRol() === 'ADMIN';
   }
 
   isLoggedIn(): boolean {
@@ -54,6 +76,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem('userId');
+    localStorage.removeItem('nombre');
     localStorage.removeItem('email');
     localStorage.removeItem('rol');
   }

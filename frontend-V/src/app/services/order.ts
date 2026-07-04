@@ -17,15 +17,25 @@ export class OrderService {
       .pipe(
         map(response => {
           const location = response.headers.get('Location');
+
           if (!location) {
             throw new Error('No se pudo obtener el ID de la orden creada');
           }
+
           return Number(location.split('/').pop());
         })
       );
   }
 
+  getAll(): Observable<OrderResponse[]> {
+    return this.http.get<OrderResponse[]>(this.baseUrl);
+  }
+
   getById(id: number): Observable<OrderResponse> {
     return this.http.get<OrderResponse>(`${this.baseUrl}/${id}`);
+  }
+
+  cancel(id: number): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${id}/status?status=CANCELADA`, null);
   }
 }

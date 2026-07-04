@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Inventory } from '../../models/inventory.model';
+import { Router } from '@angular/router';
 import { Product } from '../../models/product.model';
 import { AuthService } from '../../services/auth';
 import { CartService } from '../../services/cart';
-import { InventoryService } from '../../services/inventory';
 import { ProductService } from '../../services/product';
 
 @Component({
@@ -18,7 +17,6 @@ import { ProductService } from '../../services/product';
 export class ProductListComponent implements OnInit {
   productos: Product[] = [];
   productosFiltrados: Product[] = [];
-  inventario = new Map<number, Inventory>();
   busqueda = '';
   categoriaActiva = 'Todos';
   cargando = true;
@@ -27,17 +25,18 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private inventoryService: InventoryService,
     private cartService: CartService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.cargarProductos();
-  }
+    if (this.authService.isAdmin()) {
+      void this.router.navigate(['/admin']);
+      return;
+    }
 
-  get esAdmin(): boolean {
-    return this.authService.getRol() === 'ADMIN';
+    this.cargarProductos();
   }
 
   get categorias(): string[] {
@@ -47,38 +46,33 @@ export class ProductListComponent implements OnInit {
   cargarProductos(): void {
     this.cargando = true;
     this.error = null;
+
     this.productService.getAll().subscribe({
       next: (data) => {
         this.productos = data;
         this.aplicarFiltros();
         this.cargando = false;
-        if (this.esAdmin) this.cargarInventario();
       },
       error: () => {
-        this.error = 'No pudimos cargar el catálogo. Revisa que product-service esté disponible.';
+        this.error = 'No pudimos cargar el catalogo. Revisa que product-service este disponible.';
         this.cargando = false;
-      }
-    });
-  }
-
-  cargarInventario(): void {
-    this.inventoryService.getAll().subscribe({
-      next: (data) => {
-        this.inventario = new Map(data.map((item) => [item.productId, item]));
       }
     });
   }
 
   aplicarFiltros(): void {
     const termino = this.busqueda.trim().toLowerCase();
+
     this.productosFiltrados = this.productos.filter((producto) => {
       const coincideCategoria =
         this.categoriaActiva === 'Todos' || producto.categoria === this.categoriaActiva;
+
       const coincideTexto =
         !termino ||
         producto.nombre.toLowerCase().includes(termino) ||
         producto.categoria.toLowerCase().includes(termino) ||
         producto.codigo.toLowerCase().includes(termino);
+
       return coincideCategoria && coincideTexto;
     });
   }
@@ -90,34 +84,7 @@ export class ProductListComponent implements OnInit {
 
   agregarAlCarrito(producto: Product): void {
     this.cartService.addToCart(producto);
-    this.mostrarMensaje(`${producto.nombre} se agregó al carrito.`);
-  }
-
-  reponerStock(productId: number): void {
-    this.inventoryService.addStock(productId, 1).subscribe({
-      next: (inventory) => {
-        this.inventario.set(productId, inventory);
-        this.inventario = new Map(this.inventario);
-        this.mostrarMensaje('Se agregó una unidad al inventario.');
-      },
-      error: () => (this.error = 'No se pudo actualizar el stock.')
-    });
-  }
-
-  eliminarProducto(producto: Product): void {
-    if (!confirm(`¿Eliminar "${producto.nombre}" del catálogo?`)) return;
-
-    this.productService.delete(producto.id).subscribe({
-      next: () => {
-        this.mostrarMensaje('Producto eliminado.');
-        this.cargarProductos();
-      },
-      error: () => (this.error = 'No se puede eliminar un producto que ya tiene movimientos.')
-    });
-  }
-
-  stockDe(productId: number): number | null {
-    return this.inventario.get(productId)?.stockActual ?? null;
+    this.mostrarMensaje(`${producto.nombre} se agrego al carrito.`);
   }
 
   identificadorVisual(producto: Product): string {

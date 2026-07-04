@@ -5,10 +5,11 @@
       <h1>Todo para que tu taller siga avanzando.</h1>
       <p>
         Repuestos y herramientas seleccionados para el trabajo diario.
-        Compra simple, atención directa y precios claros.
+        Compra simple, atencion directa y precios claros.
       </p>
-      <a class="hero-cta" href="#catalogo">Ver catálogo</a>
+      <a class="hero-cta" href="#catalogo">Ver catalogo</a>
     </div>
+
     <div class="hero-visual">
       <div class="hero-number">01</div>
       <div class="tool-shape">
@@ -23,22 +24,22 @@
   <section class="service-strip" aria-label="Beneficios">
     <article>
       <strong>Compra segura</strong>
-      <span>Tu sesión y tus pedidos están protegidos.</span>
+      <span>Tu sesion y tus pedidos estan protegidos.</span>
     </article>
     <article>
-      <strong>Catálogo especializado</strong>
+      <strong>Catalogo especializado</strong>
       <span>Productos pensados para taller y mantenimiento.</span>
     </article>
     <article>
-      <strong>Atención directa</strong>
-      <span>Información clara antes de confirmar tu compra.</span>
+      <strong>Atencion directa</strong>
+      <span>Informacion clara antes de confirmar tu compra.</span>
     </article>
   </section>
 
   <section class="catalog-section" id="catalogo">
     <div class="section-heading">
       <div>
-        <span class="eyebrow">CATÁLOGO ITMAC</span>
+        <span class="eyebrow">CATALOGO ITMAC</span>
         <h2>Encuentra lo que necesitas</h2>
       </div>
     </div>
@@ -48,16 +49,18 @@
         <span aria-hidden="true">⌕</span>
         <input
           type="search"
-          placeholder="Buscar producto, categoría o código"
+          placeholder="Buscar producto, categoria o codigo"
           [(ngModel)]="busqueda"
           (input)="aplicarFiltros()"
         />
       </div>
+
       <div class="category-list">
         <button
           *ngFor="let categoria of categorias"
           [class.active]="categoriaActiva === categoria"
-          (click)="seleccionarCategoria(categoria)">
+          (click)="seleccionarCategoria(categoria)"
+        >
           {{ categoria }}
         </button>
       </div>
@@ -65,7 +68,7 @@
 
     <div class="status-card" *ngIf="cargando">
       <span class="loader"></span>
-      <p>Cargando catálogo...</p>
+      <p>Cargando catalogo...</p>
     </div>
 
     <div class="status-card error" *ngIf="error">
@@ -77,52 +80,58 @@
       <article class="product-card" *ngFor="let producto of productosFiltrados">
         <div class="product-visual" [class.has-image]="producto.imagenUrl">
           <span class="product-category">{{ producto.categoria }}</span>
-          <img *ngIf="producto.imagenUrl" [src]="producto.imagenUrl" [alt]="producto.nombre" />
-          <strong *ngIf="!producto.imagenUrl">{{ identificadorVisual(producto) }}</strong>
+
+          <img
+            *ngIf="producto.imagenUrl"
+            [src]="producto.imagenUrl"
+            [alt]="producto.nombre"
+          />
+
+          <strong *ngIf="!producto.imagenUrl">
+            {{ identificadorVisual(producto) }}
+          </strong>
+
           <small>{{ producto.codigo }}</small>
         </div>
+
         <div class="product-content">
           <div class="product-title">
             <h3>{{ producto.nombre }}</h3>
-            <span [class.inactive]="producto.estado !== 'ACTIVO'">{{ producto.estado }}</span>
+            <span [class.inactive]="producto.estado !== 'ACTIVO'">
+              {{ producto.estado }}
+            </span>
           </div>
-          <p>{{ producto.descripcion }}</p>
 
-          <div class="admin-stock" *ngIf="esAdmin">
-            <span>Stock: <strong>{{ stockDe(producto.id) ?? '—' }}</strong></span>
-            <button (click)="reponerStock(producto.id)">+1 unidad</button>
-          </div>
+          <p>{{ producto.descripcion }}</p>
 
           <div class="product-footer">
             <div>
               <small>Precio</small>
               <strong>S/ {{ producto.precio.toFixed(2) }}</strong>
             </div>
+
             <button
               class="add-button"
               [disabled]="producto.estado !== 'ACTIVO'"
-              (click)="agregarAlCarrito(producto)">
+              (click)="agregarAlCarrito(producto)"
+            >
               Agregar
             </button>
           </div>
-
-          <button class="delete-button" *ngIf="esAdmin" (click)="eliminarProducto(producto)">
-            Eliminar producto
-          </button>
         </div>
       </article>
     </div>
 
     <div class="empty-state" *ngIf="!cargando && productosFiltrados.length === 0">
       <strong>No encontramos productos</strong>
-      <p>Prueba con otra categoría o cambia tu búsqueda.</p>
+      <p>Prueba con otra categoria o cambia tu busqueda.</p>
     </div>
   </section>
 
   <section class="contact-strip" id="contacto">
     <img src="/itmac-logo.svg" alt="ITMAC Future" />
     <div>
-      <strong>¿Necesitas ayuda para elegir?</strong>
+      <strong>Necesitas ayuda para elegir?</strong>
       <span>Consulta con nuestro equipo antes de realizar tu pedido.</span>
     </div>
     <a href="mailto:ventas@itmacfuture.com">ventas@itmacfuture.com</a>

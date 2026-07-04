@@ -9,7 +9,10 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Optional<Product> findByCodigo(String codigo);
-    List<Product> findByCategoria(String categoria);
-    List<Product> findByEstado(String estado);
 
+    Optional<Product> findTopByCodigoStartingWithOrderByIdDesc(String prefix);
+
+    List<Product> findByCategoria(String categoria);
+
+    List<Product> findByEstado(String estado);
 }

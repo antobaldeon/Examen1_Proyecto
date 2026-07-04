@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LoginRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
@@ -19,12 +19,13 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
+    private route: ActivatedRoute,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
-      void this.router.navigate(['/products']);
+      void this.router.navigate([this.authService.isAdmin() ? '/admin' : this.returnUrl]);
     }
   }
 
@@ -32,7 +33,7 @@ export class LoginComponent implements OnInit {
     this.errorMessage = '';
 
     if (!this.request.email.trim() || !this.request.password) {
-      this.errorMessage = 'Completa el correo y la contraseña.';
+      this.errorMessage = 'Completa el correo y la contrasena.';
       return;
     }
 
@@ -41,12 +42,17 @@ export class LoginComponent implements OnInit {
       next: (response) => {
         this.authService.saveSession(response);
         this.enviando = false;
-        void this.router.navigate(['/products']);
+        void this.router.navigate([response.rol === 'ADMIN' ? '/admin' : this.returnUrl]);
       },
       error: () => {
         this.enviando = false;
         this.errorMessage = 'Credenciales incorrectas o servicio no disponible.';
       }
     });
+  }
+
+  private get returnUrl(): string {
+    const value = this.route.snapshot.queryParamMap.get('returnUrl');
+    return value && value.startsWith('/') ? value : '/products';
   }
 }

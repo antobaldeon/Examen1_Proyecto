@@ -1,35 +1,166 @@
 <main class="admin-page">
   <header class="admin-heading">
     <div>
-      <span>ADMINISTRACIÓN</span>
+      <span>ADMINISTRACION</span>
       <h1>Panel de control</h1>
-      <p>Gestiona el catálogo y las próximas herramientas de la tienda desde un solo lugar.</p>
+      <p>Gestiona productos, inventario y ordenes desde un solo lugar.</p>
     </div>
-    <a routerLink="/products">Volver a la tienda</a>
+
+    <a routerLink="/admin/products/new">Agregar producto</a>
   </header>
 
-  <section class="admin-grid">
-    <a class="admin-option primary" routerLink="/admin/products/new">
-      <div class="option-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm9.2 5.2-2-.7a7.8 7.8 0 0 0 0-1.4l2-.7-1.5-3.5-1.9.9c-.3-.4-.7-.7-1-1l.9-1.9-3.5-1.5-.7 2a7.8 7.8 0 0 0-1.4 0l-.7-2-3.5 1.5.9 1.9c-.4.3-.7.7-1 1l-1.9-.9-1.5 3.5 2 .7a7.8 7.8 0 0 0 0 1.4l-2 .7 1.5 3.5 1.9-.9c.3.4.7.7 1 1l-.9 1.9 3.5 1.5.7-2a7.8 7.8 0 0 0 1.4 0l.7 2 3.5-1.5-.9-1.9c.4-.3.7-.7 1-1l1.9.9 1.5-3.5Z"/>
-        </svg>
-      </div>
-      <div>
-        <small>CATÁLOGO</small>
-        <h2>Agregar producto</h2>
-        <p>Registra datos, imagen, precio y stock inicial.</p>
-      </div>
-      <span class="option-arrow">→</span>
-    </a>
+  <nav class="admin-tabs">
+    <button [class.active]="tab === 'productos'" (click)="tab = 'productos'">
+      Productos
+    </button>
+    <button [class.active]="tab === 'inventario'" (click)="tab = 'inventario'">
+      Inventario
+    </button>
+    <button [class.active]="tab === 'ordenes'" (click)="tab = 'ordenes'">
+      Ordenes
+    </button>
+  </nav>
 
-    <article class="admin-option coming-soon">
-      <div class="placeholder-icon">+</div>
-      <div>
-        <small>PRÓXIMAMENTE</small>
-        <h2>Nueva opción</h2>
-        <p>Este espacio queda preparado para futuras funciones administrativas.</p>
-      </div>
-    </article>
+  <p class="admin-message" *ngIf="mensaje">{{ mensaje }}</p>
+  <p class="admin-error" *ngIf="error">{{ error }}</p>
+
+  <section *ngIf="tab === 'productos'" class="admin-section">
+    <div class="admin-toolbar">
+      <input
+        type="search"
+        placeholder="Buscar por nombre, codigo o categoria"
+        [(ngModel)]="busqueda"
+        (input)="aplicarFiltros()"
+      />
+
+      <select [(ngModel)]="categoriaActiva" (change)="aplicarFiltros()">
+        <option *ngFor="let categoria of categorias" [value]="categoria">
+          {{ categoria }}
+        </option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+        <tr>
+          <th>Codigo</th>
+          <th>Producto</th>
+          <th>Categoria</th>
+          <th>Precio</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let producto of productosFiltrados">
+          <td>{{ producto.codigo }}</td>
+          <td>{{ producto.nombre }}</td>
+          <td>{{ producto.categoria }}</td>
+          <td>S/ {{ producto.precio.toFixed(2) }}</td>
+          <td>{{ producto.estado }}</td>
+          <td class="actions">
+            <a [routerLink]="['/admin/products', producto.id, 'edit']">Editar</a>
+            <button (click)="eliminarProducto(producto)">Eliminar</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section *ngIf="tab === 'inventario'" class="admin-section">
+    <div class="table-wrap">
+      <table>
+        <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Stock</th>
+          <th>Minimo</th>
+          <th>Estado</th>
+          <th>Ubicacion</th>
+          <th>Accion</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let item of inventarioOrdenado" [class.low-stock]="item.stockActual <= 5">
+          <td>{{ item.productName || item.productId }}</td>
+          <td>{{ item.stockActual }}</td>
+          <td>{{ item.stockMinimo }}</td>
+          <td>{{ item.estado }}</td>
+          <td>{{ item.ubicacion }}</td>
+          <td>
+            <button (click)="agregarStock(item)">Agregar stock</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section *ngIf="tab === 'ordenes'" class="admin-section">
+    <div class="table-wrap">
+      <table>
+        <thead>
+        <tr>
+          <th>Codigo</th>
+          <th>Fecha</th>
+          <th>Cliente</th>
+          <th>Correo</th>
+          <th>Total</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <ng-container *ngFor="let orden of ordenes">
+          <tr>
+            <td>{{ orden.codigo || orden.id }}</td>
+            <td>{{ orden.fecha | date:'short' }}</td>
+            <td>{{ orden.usuarioNombre || 'Sin nombre' }}</td>
+            <td>{{ orden.usuarioEmail || 'Sin correo' }}</td>
+            <td>S/ {{ orden.total.toFixed(2) }}</td>
+            <td>{{ orden.estado }}</td>
+            <td class="actions">
+              <button (click)="verDetalleOrden(orden)">Detalles</button>
+              <button
+                [disabled]="orden.estado === 'CANCELADA'"
+                (click)="cancelarOrden(orden)"
+              >
+                Cancelar
+              </button>
+            </td>
+          </tr>
+
+          <tr class="detail-row" *ngIf="detalleOrdenId === orden.id">
+            <td colspan="7">
+              <div class="order-detail">
+                <strong>Detalle de productos</strong>
+
+                <p *ngFor="let detalle of orden.detalles">
+                  {{ detalle.productName }} x {{ detalle.cantidad }}
+                  - S/ {{ detalle.subtotal.toFixed(2) }}
+                </p>
+
+                <strong>Pago</strong>
+
+                <p *ngIf="pagoDe(orden.id) as pago">
+                  {{ pago.estado }} - {{ pago.nombreCompleto }} -
+                  {{ pago.correoElectronico }} - S/ {{ pago.monto.toFixed(2) }}
+                </p>
+
+                <p *ngIf="pagoDe(orden.id) === null">
+                  No hay pago registrado para esta orden.
+                </p>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+        </tbody>
+      </table>
+    </div>
   </section>
 </main>

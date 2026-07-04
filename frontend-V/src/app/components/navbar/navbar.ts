@@ -27,24 +27,30 @@ export class NavbarComponent implements OnInit {
   }
 
   goToCart(): void {
+    if (this.isAdmin) return;
     this.router.navigate(['/cart']);
   }
 
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
   get email(): string {
-    return this.authService.getEmail() ?? '';
+    return this.authService.getEmail() ?? 'Invitado';
   }
 
   get roleLabel(): string {
+    if (!this.isLoggedIn) return 'Cliente visitante';
     return this.authService.getRol() === 'ADMIN' ? 'Administrador' : 'Cliente';
   }
 
   get isAdmin(): boolean {
-    return this.authService.getRol() === 'ADMIN';
+    return this.authService.isAdmin();
   }
 
   logout(): void {
     this.authService.logout();
     this.cartService.clearCart();
-    void this.router.navigate(['/login']);
+    void this.router.navigate(['/products']);
   }
 }

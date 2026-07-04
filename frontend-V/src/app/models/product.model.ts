@@ -16,7 +16,7 @@ export interface ProductRequest {
   descripcion: string;
   categoria: string;
   precio: number;
-  codigo: string;
+  codigo?: string;
   estado: string;
   imagenUrl?: string;
 }

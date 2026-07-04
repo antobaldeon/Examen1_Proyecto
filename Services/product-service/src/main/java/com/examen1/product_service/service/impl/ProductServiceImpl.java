@@ -17,16 +17,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
+    private static final String PRODUCT_CODE_PREFIX = "IF-";
+
     private final ProductRepository repository;
     private final ProductMapper mapper;
     private final PricingService pricingService;
 
-
     @Override
     public ProductResponse create(ProductRequest request) {
         Product product = mapper.toEntity(request);
+        product.setCodigo(generateNextCode());
         product.setFechaCreacion(LocalDateTime.now());
+
         product = repository.save(product);
+
         return mapper.toResponse(product);
     }
 
@@ -38,13 +42,12 @@ public class ProductServiceImpl implements ProductService {
                 .toList();
     }
 
-
     @Override
     public ProductResponse getById(Long id) {
         Product product = findProduct(id);
         return enrichWithCurrentPrice(mapper.toResponse(product));
-
     }
+
     @Override
     public ProductResponse getByCodigo(String codigo) {
         Product product = repository.findByCodigo(codigo)
@@ -52,7 +55,6 @@ public class ProductServiceImpl implements ProductService {
 
         return enrichWithCurrentPrice(mapper.toResponse(product));
     }
-
 
     @Override
     public ProductResponse update(Long id, ProductRequest request) {
@@ -62,11 +64,11 @@ public class ProductServiceImpl implements ProductService {
         product.setDescripcion(request.getDescripcion());
         product.setCategoria(request.getCategoria());
         product.setPrecio(request.getPrecio());
-        product.setCodigo(request.getCodigo());
         product.setEstado(request.getEstado());
         product.setImagenUrl(request.getImagenUrl());
 
         product = repository.save(product);
+
         return mapper.toResponse(product);
     }
 
@@ -81,17 +83,31 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
+    private String generateNextCode() {
+        return repository.findTopByCodigoStartingWithOrderByIdDesc(PRODUCT_CODE_PREFIX)
+                .map(Product::getCodigo)
+                .map(this::nextCodeFrom)
+                .orElse(PRODUCT_CODE_PREFIX + "0001");
+    }
+
+    private String nextCodeFrom(String currentCode) {
+        try {
+            int currentNumber = Integer.parseInt(currentCode.replace(PRODUCT_CODE_PREFIX, ""));
+            return PRODUCT_CODE_PREFIX + String.format("%04d", currentNumber + 1);
+        } catch (NumberFormatException ex) {
+            return PRODUCT_CODE_PREFIX + String.format("%04d", repository.count() + 1);
+        }
+    }
+
     private ProductResponse enrichWithCurrentPrice(ProductResponse response) {
         try {
             var currentPrice = pricingService.getCurrentPrice(response.getId());
             response.setPrecio(currentPrice.getPrecio().doubleValue());
             response.setTipoMoneda(currentPrice.getTipoMoneda());
         } catch (RuntimeException ex) {
-
+            // Si no existe precio historico, se mantiene el precio del producto.
         }
 
         return response;
     }
-
-
 }
