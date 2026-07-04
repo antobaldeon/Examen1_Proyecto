@@ -33,7 +33,4 @@ public class InventoryLookupService {
     private void updateInventoryFallback(Long productId, StockUpdateRequest request, Exception ex) {
         throw new RuntimeException("Inventory service unavailable");
     }
-
-
-
 }

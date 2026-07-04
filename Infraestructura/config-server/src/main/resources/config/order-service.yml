@@ -58,12 +58,12 @@ resilience4j:
   retry:
     instances:
       productService:
-        maxAttempts: 3
-        waitDuration: 1s
+        maxAttempts: 1
+        waitDuration: 500ms
 
       inventoryService:
-        maxAttempts: 3
-        waitDuration: 1s
+        maxAttempts: 1
+        waitDuration: 500ms
 
   ratelimiter:
     instances:
