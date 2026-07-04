@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <style>
+      .bg { fill: #f7f8fb; }
+      .title { font: 700 42px Arial, sans-serif; fill: #111827; }
+      .subtitle { font: 400 20px Arial, sans-serif; fill: #5b6472; }
+      .section-title { font: 700 22px Arial, sans-serif; fill: #1f2937; }
+      .box-title { font: 700 20px Arial, sans-serif; fill: #111827; }
+      .box-sub { font: 400 15px Arial, sans-serif; fill: #4b5563; }
+      .small { font: 400 13px Arial, sans-serif; fill: #6b7280; }
+      .pill-text { font: 700 13px Arial, sans-serif; fill: #ffffff; }
+      .box { fill: #ffffff; stroke: #d7dce5; stroke-width: 2; rx: 16; }
+      .box-red { fill: #fff5f5; stroke: #e11d2e; stroke-width: 2; rx: 16; }
+      .box-blue { fill: #f0f6ff; stroke: #2e74b5; stroke-width: 2; rx: 16; }
+      .box-green { fill: #f0fdf4; stroke: #16a34a; stroke-width: 2; rx: 16; }
+      .box-purple { fill: #f7f2ff; stroke: #7c3aed; stroke-width: 2; rx: 16; }
+      .box-orange { fill: #fff7ed; stroke: #f97316; stroke-width: 2; rx: 16; }
+      .box-gray { fill: #f9fafb; stroke: #9ca3af; stroke-width: 2; rx: 16; }
+      .database { fill: #ffffff; stroke: #64748b; stroke-width: 2; }
+      .arrow { stroke: #334155; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+      .arrow-red { stroke: #e11d2e; stroke-width: 3; fill: none; marker-end: url(#arrowhead-red); }
+      .arrow-dashed { stroke: #64748b; stroke-width: 3; fill: none; stroke-dasharray: 9 8; marker-end: url(#arrowhead-gray); }
+      .label { font: 700 13px Arial, sans-serif; fill: #334155; }
+      .legend { font: 400 14px Arial, sans-serif; fill: #374151; }
+      .band { fill: #ffffff; stroke: #e5e7eb; stroke-width: 2; rx: 24; }
+    </style>
+    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#334155"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#e11d2e"/>
+    </marker>
+    <marker id="arrowhead-gray" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="1000"/>
+
+  <text class="title" x="80" y="72">Arquitectura de Microservicios - ITMAC Future</text>
+  <text class="subtitle" x="82" y="106">Spring Boot + Spring Cloud Gateway + Eureka + Config Server + Angular</text>
+
+  <rect class="band" x="60" y="145" width="1480" height="735"/>
+
+  <!-- Client Layer -->
+  <text class="section-title" x="100" y="190">Capa de Clientes</text>
+  <rect class="box-red" x="100" y="220" width="260" height="120"/>
+  <text class="box-title" x="130" y="263">Usuario / Admin</text>
+  <text class="box-sub" x="130" y="292">Navegador web</text>
+  <text class="box-sub" x="130" y="318">Compra y administracion</text>
+
+  <rect class="box-red" x="450" y="220" width="290" height="120"/>
+  <text class="box-title" x="480" y="260">Frontend Angular</text>
+  <text class="box-sub" x="480" y="290">Puerto local: 4200</text>
+  <text class="box-sub" x="480" y="318">Catalogo, login, registro</text>
+
+  <!-- Gateway Layer -->
+  <text class="section-title" x="840" y="190">Entrada Unica</text>
+  <rect class="box-blue" x="830" y="220" width="330" height="140"/>
+  <text class="box-title" x="862" y="258">API Gateway</text>
+  <text class="box-sub" x="862" y="288">Puerto: 8061</text>
+  <text class="box-sub" x="862" y="316">Rutas lb://, CORS, JWT</text>
+  <text class="box-sub" x="862" y="342">Circuit Breaker y LoadBalancer</text>
+
+  <!-- Security Bubble -->
+  <rect x="1200" y="235" width="245" height="95" rx="18" fill="#111827"/>
+  <text class="pill-text" x="1230" y="268">Filtro JWT</text>
+  <text class="pill-text" x="1230" y="296">Roles: ADMIN / USER</text>
+  <text class="pill-text" x="1230" y="320">401 / 403 si no autoriza</text>
+
+  <!-- Infrastructure -->
+  <text class="section-title" x="100" y="420">Infraestructura Global</text>
+  <rect class="box-green" x="100" y="450" width="280" height="110"/>
+  <text class="box-title" x="130" y="490">Eureka Server</text>
+  <text class="box-sub" x="130" y="520">Service Registry :8762</text>
+  <text class="box-sub" x="130" y="545">Descubrimiento de servicios</text>
+
+  <rect class="box-purple" x="450" y="450" width="290" height="110"/>
+  <text class="box-title" x="480" y="490">Config Server</text>
+  <text class="box-sub" x="480" y="520">Puerto: 8089</text>
+  <text class="box-sub" x="480" y="545">Configuracion centralizada</text>
+
+  <!-- Services -->
+  <text class="section-title" x="830" y="420">Capa de Microservicios</text>
+
+  <rect class="box" x="830" y="450" width="250" height="105"/>
+  <text class="box-title" x="858" y="490">Auth Service</text>
+  <text class="box-sub" x="858" y="520">Login y JWT</text>
+  <text class="box-sub" x="858" y="543">Puerto: 8088</text>
+
+  <rect class="box" x="1130" y="450" width="250" height="105"/>
+  <text class="box-title" x="1158" y="490">Usuario Service</text>
+  <text class="box-sub" x="1158" y="520">Registro y roles</text>
+  <text class="box-sub" x="1158" y="543">Puerto: 8087</text>
+
+  <rect class="box" x="830" y="595" width="250" height="105"/>
+  <text class="box-title" x="858" y="635">Product Service</text>
+  <text class="box-sub" x="858" y="665">Catalogo e imagenes</text>
+  <text class="box-sub" x="858" y="688">Puerto: 8084</text>
+
+  <rect class="box" x="1130" y="595" width="250" height="105"/>
+  <text class="box-title" x="1158" y="635">Inventory Service</text>
+  <text class="box-sub" x="1158" y="665">Stock y ubicacion</text>
+  <text class="box-sub" x="1158" y="688">Puerto: 8085</text>
+
+  <rect class="box" x="830" y="740" width="250" height="105"/>
+  <text class="box-title" x="858" y="780">Order Service</text>
+  <text class="box-sub" x="858" y="810">Ordenes de compra</text>
+  <text class="box-sub" x="858" y="833">Puerto: 8086</text>
+
+  <rect class="box" x="1130" y="740" width="250" height="105"/>
+  <text class="box-title" x="1158" y="780">Payment Service</text>
+  <text class="box-sub" x="1158" y="810">Pagos</text>
+  <text class="box-sub" x="1158" y="833">Puerto: 8081</text>
+
+  <!-- External Drive -->
+  <rect class="box-orange" x="1420" y="595" width="90" height="250"/>
+  <text class="box-title" x="1439" y="640" transform="rotate(90 1439,640)">Google Drive</text>
+  <text class="small" x="1465" y="740" transform="rotate(90 1465,740)">Imagenes</text>
+
+  <!-- Databases -->
+  <text class="section-title" x="100" y="650">Capa de Datos</text>
+  <ellipse class="database" cx="190" cy="710" rx="90" ry="24"/>
+  <rect class="database" x="100" y="710" width="180" height="85"/>
+  <ellipse class="database" cx="190" cy="795" rx="90" ry="24"/>
+  <text class="box-title" x="137" y="755">MySQL</text>
+  <text class="small" x="122" y="780">usuarios / productos</text>
+
+  <ellipse class="database" cx="430" cy="710" rx="90" ry="24"/>
+  <rect class="database" x="340" y="710" width="180" height="85"/>
+  <ellipse class="database" cx="430" cy="795" rx="90" ry="24"/>
+  <text class="box-title" x="379" y="755">PostgreSQL</text>
+  <text class="small" x="385" y="780">inventario</text>
+
+  <ellipse class="database" cx="670" cy="710" rx="90" ry="24"/>
+  <rect class="database" x="580" y="710" width="180" height="85"/>
+  <ellipse class="database" cx="670" cy="795" rx="90" ry="24"/>
+  <text class="box-title" x="628" y="755">Oracle</text>
+  <text class="small" x="632" y="780">ordenes</text>
+
+  <!-- Main arrows -->
+  <path class="arrow-red" d="M360 280 L450 280"/>
+  <text class="label" x="382" y="260">HTTP</text>
+
+  <path class="arrow-red" d="M740 280 L830 280"/>
+  <text class="label" x="755" y="260">/api/v1</text>
+
+  <path class="arrow" d="M1160 290 L1200 290"/>
+
+  <path class="arrow" d="M995 360 L955 450"/>
+  <path class="arrow" d="M1025 360 L1255 450"/>
+  <path class="arrow" d="M980 360 L955 595"/>
+  <path class="arrow" d="M1040 360 L1255 595"/>
+  <path class="arrow" d="M950 360 L955 740"/>
+  <path class="arrow" d="M1070 360 L1255 740"/>
+
+  <!-- Infrastructure dashed arrows -->
+  <path class="arrow-dashed" d="M380 500 L830 315"/>
+  <text class="label" x="555" y="392">descubrimiento</text>
+  <path class="arrow-dashed" d="M740 500 L830 500"/>
+  <path class="arrow-dashed" d="M740 505 L1130 500"/>
+  <path class="arrow-dashed" d="M740 520 L830 650"/>
+  <path class="arrow-dashed" d="M740 530 L1130 650"/>
+  <text class="label" x="585" y="448">configuracion</text>
+
+  <!-- Service to db arrows -->
+  <path class="arrow" d="M1130 502 C760 530, 300 595, 210 710"/>
+  <path class="arrow" d="M955 700 C900 760, 410 620, 210 710"/>
+  <path class="arrow" d="M1255 700 C1050 770, 640 625, 430 710"/>
+  <path class="arrow" d="M955 845 C900 910, 735 870, 670 795"/>
+  <path class="arrow" d="M1080 648 L1420 690"/>
+
+  <!-- Service interactions -->
+  <path class="arrow-dashed" d="M1080 647 L1130 647"/>
+  <text class="label" x="1088" y="628">stock</text>
+  <path class="arrow-dashed" d="M1080 792 L1130 792"/>
+  <text class="label" x="1088" y="773">pago</text>
+
+  <!-- Legend -->
+  <rect x="80" y="910" width="1440" height="55" rx="14" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
+  <line x1="115" y1="937" x2="170" y2="937" class="arrow"/>
+  <text class="legend" x="185" y="942">Solicitud HTTP / comunicacion entre servicios</text>
+  <line x1="520" y1="937" x2="575" y2="937" class="arrow-dashed"/>
+  <text class="legend" x="590" y="942">Registro, descubrimiento o configuracion</text>
+  <rect x="925" y="924" width="44" height="24" rx="12" fill="#fff5f5" stroke="#e11d2e" stroke-width="2"/>
+  <text class="legend" x="985" y="942">Frontend y seguridad resaltados</text>
+  <rect x="1240" y="924" width="44" height="24" rx="12" fill="#f0f6ff" stroke="#2e74b5" stroke-width="2"/>
+  <text class="legend" x="1300" y="942">Gateway como punto de entrada</text>
+</svg>

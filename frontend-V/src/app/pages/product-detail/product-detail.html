@@ -1,0 +1,69 @@
+<main class="detail-page">
+  <a class="back-link" routerLink="/">Volver al catalogo</a>
+
+  <section class="status-card" *ngIf="loading">
+    <span class="loader"></span>
+    <p>Cargando producto...</p>
+  </section>
+
+  <section class="status-card error" *ngIf="!loading && error">
+    <p>{{ error }}</p>
+  </section>
+
+  <section class="product-detail" *ngIf="!loading && product">
+    <div class="gallery">
+      <div class="main-image">
+        <img *ngIf="selectedImage" [src]="selectedImage" [alt]="product.nombre" />
+        <strong *ngIf="!selectedImage">{{ product.nombre.slice(0, 2).toUpperCase() }}</strong>
+      </div>
+
+      <div class="thumbs" *ngIf="images.length > 1">
+        <button
+          type="button"
+          *ngFor="let image of images"
+          [class.active]="selectedImage === image"
+          (click)="selectImage(image)">
+          <img [src]="image" [alt]="product.nombre" />
+        </button>
+      </div>
+    </div>
+
+    <aside class="buy-box">
+      <span class="category">{{ product.categoria }}</span>
+      <h1>{{ product.nombre }}</h1>
+      <p class="code">Codigo: {{ product.codigo }}</p>
+
+      <div class="price-block">
+        <small>Precio online</small>
+        <strong>S/ {{ product.precio.toFixed(2) }}</strong>
+        <span>{{ product.estado }}</span>
+      </div>
+
+      <p class="description">{{ product.descripcion }}</p>
+
+      <div class="quantity-row">
+        <label>
+          Cantidad
+          <input type="number" min="1" max="99" [(ngModel)]="cantidad" />
+        </label>
+      </div>
+
+      <button class="primary-action" type="button" [disabled]="product.estado !== 'ACTIVO'" (click)="addToCart()">
+        Agregar al carrito
+      </button>
+
+      <p class="message" *ngIf="message">{{ message }}</p>
+
+      <div class="info-list">
+        <article>
+          <strong>Retiro o envio</strong>
+          <span>Coordina la entrega despues de confirmar tu compra.</span>
+        </article>
+        <article>
+          <strong>Compra segura</strong>
+          <span>Tu pedido queda asociado a tu cuenta ITMAC Future.</span>
+        </article>
+      </div>
+    </aside>
+  </section>
+</main>

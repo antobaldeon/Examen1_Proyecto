@@ -1,0 +1,4 @@
+.env*.local
+*.secret.properties
+google-drive-oauth.properties
+project-*.json
