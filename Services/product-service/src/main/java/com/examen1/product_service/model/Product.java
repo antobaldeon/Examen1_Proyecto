@@ -16,6 +16,8 @@ public class Product {
 
     private String nombre;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String descripcion;
 
     private String categoria;

@@ -162,3 +162,21 @@ resilience4j:
       orderServiceGateway:
         maxAttempts: 5
         waitDuration: 10s
+
+  timelimiter:
+    instances:
+      productServiceGateway:
+        timeoutDuration: 120s
+        cancelRunningFuture: false
+
+      inventoryServiceGateway:
+        timeoutDuration: 120s
+        cancelRunningFuture: false
+
+      orderServiceGateway:
+        timeoutDuration: 120s
+        cancelRunningFuture: false
+
+      paymentServiceGateway:
+        timeoutDuration: 120s
+        cancelRunningFuture: false

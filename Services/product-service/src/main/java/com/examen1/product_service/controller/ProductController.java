@@ -74,13 +74,13 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@RequestBody ProductRequest request) {
+    public ResponseEntity<ProductResponse> create(@RequestBody ProductRequest request) {
         logRequest("POST /api/v1/products");
         ProductResponse response = service.create(request);
 
         return ResponseEntity.created(
                 URI.create("/api/v1/products/" + response.getId())
-        ).build();
+        ).body(response);
     }
 
     @PostMapping("/images")
