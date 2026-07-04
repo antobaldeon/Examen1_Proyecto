@@ -4,6 +4,7 @@ import com.examen1.order_service.dto.OrderRequest;
 import com.examen1.order_service.dto.OrderResponse;
 import com.examen1.order_service.model.OrderStatus;
 import com.examen1.order_service.service.service.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,19 +30,22 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@RequestBody OrderRequest request) {
+    public ResponseEntity<OrderResponse> create(@Valid @RequestBody OrderRequest request) {
         OrderResponse response = service.create(request);
 
         return ResponseEntity.created(
                 URI.create("/api/v1/orders/" + response.getId())
-        ).build();
+        ).body(response);
     }
 
     @PutMapping("/{id}/status")
     public ResponseEntity<Void> updateStatus(@PathVariable Long id, @RequestParam String status) {
-        OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
-        service.updateStatus(id, orderStatus);
-        return ResponseEntity.ok().build();
+        try {
+            OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
+            service.updateStatus(id, orderStatus);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException ex) {
+            throw new RuntimeException("Estado de orden invalido: " + status);
+        }
     }
-
 }

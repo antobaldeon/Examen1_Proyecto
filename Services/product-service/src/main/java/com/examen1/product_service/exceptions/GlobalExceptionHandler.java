@@ -1,4 +1,4 @@
-package com.examen1.payment_service.exceptions;
+package com.examen1.product_service.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,15 +51,15 @@ public class GlobalExceptionHandler {
 
         String lower = message.toLowerCase();
 
-        if (lower.contains("no encontrada") || lower.contains("no encontrado") || lower.contains("not found")) {
+        if (lower.contains("not found") || lower.contains("no encontrado") || lower.contains("no encontrada")) {
             return HttpStatus.NOT_FOUND;
         }
 
-        if (lower.contains("cancelada") || lower.contains("ya se encuentra pagada") || lower.contains("stock insuficiente")) {
+        if (lower.contains("repetido") || lower.contains("ya existe")) {
             return HttpStatus.CONFLICT;
         }
 
-        if (lower.contains("invalido") || lower.contains("inválido") || lower.contains("obligatorio")) {
+        if (lower.contains("obligatorio") || lower.contains("invalido") || lower.contains("inválido")) {
             return HttpStatus.BAD_REQUEST;
         }
 

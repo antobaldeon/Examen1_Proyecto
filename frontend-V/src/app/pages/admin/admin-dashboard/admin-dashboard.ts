@@ -11,7 +11,7 @@ import { OrderService } from '../../../services/order';
 import { PaymentService } from '../../../services/payment';
 import { ProductService } from '../../../services/product';
 
-type AdminTab = 'productos' | 'inventario' | 'ordenes';
+type AdminTab = 'reportes' | 'productos' | 'inventario' | 'ordenes';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -21,17 +21,30 @@ type AdminTab = 'productos' | 'inventario' | 'ordenes';
   styleUrl: './admin-dashboard.css'
 })
 export class AdminDashboardComponent implements OnInit {
-  tab: AdminTab = 'productos';
+  tab: AdminTab = 'reportes';
 
   productos: Product[] = [];
   productosFiltrados: Product[] = [];
+
   inventario: Inventory[] = [];
+  inventarioFiltrado: Inventory[] = [];
+
   ordenes: OrderResponse[] = [];
+  ordenesFiltradas: OrderResponse[] = [];
+
   pagos = new Map<number, PaymentResponse | null>();
 
   detalleOrdenId: number | null = null;
+
   busqueda = '';
   categoriaActiva = 'Todos';
+
+  busquedaInventario = '';
+  filtroStock = 'Todos';
+
+  busquedaOrdenes = '';
+  filtroEstadoOrden = 'Todos';
+
   mensaje = '';
   error = '';
   cargando = false;
@@ -51,8 +64,30 @@ export class AdminDashboardComponent implements OnInit {
     return ['Todos', ...new Set(this.productos.map((p) => p.categoria).filter(Boolean))];
   }
 
-  get inventarioOrdenado(): Inventory[] {
-    return [...this.inventario].sort((a, b) => a.stockActual - b.stockActual);
+  get estadosOrden(): string[] {
+    return ['Todos', ...new Set(this.ordenes.map((o) => o.estado).filter(Boolean))];
+  }
+
+  get cantidadProductos(): number {
+    return this.productos.length;
+  }
+
+  get ordenesRecientes(): OrderResponse[] {
+    return this.ordenes.slice(0, 5);
+  }
+
+  get ventasTotales(): number {
+    return this.ordenes
+      .filter((orden) => orden.estado === 'PAGADA')
+      .reduce((total, orden) => total + orden.total, 0);
+  }
+
+  get pagosRealizados(): number {
+    return this.ordenes.filter((orden) => orden.estado === 'PAGADA').length;
+  }
+
+  get productosStockBajo(): Inventory[] {
+    return this.inventario.filter((item) => item.stockActual <= 5);
   }
 
   cargarTodo(): void {
@@ -62,7 +97,7 @@ export class AdminDashboardComponent implements OnInit {
     this.productService.getAll().subscribe({
       next: (productos) => {
         this.productos = productos;
-        this.aplicarFiltros();
+        this.aplicarFiltrosProductos();
         this.cargando = false;
       },
       error: () => {
@@ -73,7 +108,8 @@ export class AdminDashboardComponent implements OnInit {
 
     this.inventoryService.getAll().subscribe({
       next: (inventario) => {
-        this.inventario = inventario;
+        this.inventario = [...inventario].sort((a, b) => a.stockActual - b.stockActual);
+        this.aplicarFiltrosInventario();
       },
       error: () => {
         this.error = 'No se pudo cargar inventario.';
@@ -85,6 +121,7 @@ export class AdminDashboardComponent implements OnInit {
         this.ordenes = [...ordenes].sort(
           (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
         );
+        this.aplicarFiltrosOrdenes();
       },
       error: () => {
         this.error = 'No se pudo cargar ordenes.';
@@ -92,7 +129,7 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  aplicarFiltros(): void {
+  aplicarFiltrosProductos(): void {
     const termino = this.busqueda.trim().toLowerCase();
 
     this.productosFiltrados = this.productos.filter((producto) => {
@@ -107,6 +144,49 @@ export class AdminDashboardComponent implements OnInit {
 
       return coincideCategoria && coincideTexto;
     });
+  }
+
+  aplicarFiltrosInventario(): void {
+    const termino = this.busquedaInventario.trim().toLowerCase();
+
+    this.inventarioFiltrado = this.inventario.filter((item) => {
+      const nombre = item.productName ?? String(item.productId);
+      const coincideTexto =
+        !termino ||
+        nombre.toLowerCase().includes(termino) ||
+        item.ubicacion.toLowerCase().includes(termino) ||
+        String(item.productId).includes(termino);
+
+      const coincideStock =
+        this.filtroStock === 'Todos' ||
+        (this.filtroStock === 'Bajo' && item.stockActual <= 5) ||
+        (this.filtroStock === 'SinStock' && item.stockActual === 0) ||
+        (this.filtroStock === 'Disponible' && item.stockActual > 5);
+
+      return coincideTexto && coincideStock;
+    });
+  }
+
+  aplicarFiltrosOrdenes(): void {
+    const termino = this.busquedaOrdenes.trim().toLowerCase();
+
+    this.ordenesFiltradas = this.ordenes.filter((orden) => {
+      const coincideTexto =
+        !termino ||
+        String(orden.id).includes(termino) ||
+        (orden.codigo ?? '').toLowerCase().includes(termino) ||
+        (orden.usuarioNombre ?? '').toLowerCase().includes(termino) ||
+        (orden.usuarioEmail ?? '').toLowerCase().includes(termino);
+
+      const coincideEstado =
+        this.filtroEstadoOrden === 'Todos' || orden.estado === this.filtroEstadoOrden;
+
+      return coincideTexto && coincideEstado;
+    });
+  }
+
+  cambiarTab(tab: AdminTab): void {
+    this.tab = tab;
   }
 
   eliminarProducto(producto: Product): void {
@@ -136,6 +216,23 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: () => {
         this.error = 'No se pudo actualizar el stock.';
+      }
+    });
+  }
+
+  restarStock(item: Inventory): void {
+    const valor = prompt(`Cantidad a restar para ${item.productName ?? 'producto'}:`, '1');
+    const cantidad = Number(valor);
+
+    if (!Number.isFinite(cantidad) || cantidad <= 0) return;
+
+    this.inventoryService.subtractStock(item.productId, cantidad).subscribe({
+      next: () => {
+        this.mostrarMensaje('Stock actualizado.');
+        this.cargarTodo();
+      },
+      error: () => {
+        this.error = 'No se pudo restar stock. Verifica la cantidad disponible.';
       }
     });
   }

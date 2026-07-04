@@ -129,18 +129,16 @@ export class ProductCreateComponent implements OnInit {
     this.guardando = true;
 
     const save$ = this.productId
-      ? this.productService.update(this.productId, this.producto).pipe(
-          switchMap(() => of(this.productId as number))
-        )
+      ? this.productService.update(this.productId, this.producto)
       : this.productService.create(this.producto);
 
     save$
       .pipe(
-        switchMap((productId) => {
+        switchMap((product) => {
           if (this.productId) return of(null);
 
           const inventory: InventoryRequest = {
-            productId,
+            productId: product.id,
             ...this.inventario
           };
 
@@ -150,8 +148,8 @@ export class ProductCreateComponent implements OnInit {
       )
       .subscribe({
         next: () => void this.router.navigate(['/admin']),
-        error: () => {
-          this.error = 'No se pudo guardar. Revisa que los servicios esten activos.';
+        error: (err) => {
+          this.error = err?.error?.message ?? 'No se pudo guardar. Revisa que los servicios esten activos.';
         }
       });
   }

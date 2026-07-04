@@ -10,16 +10,16 @@
 
   <section class="empty-cart" *ngIf="items.length === 0">
     <div class="empty-mark">0</div>
-    <h2>Tu carrito está vacío</h2>
-    <p>Explora el catálogo y agrega los productos que necesita tu taller.</p>
-    <a routerLink="/products">Ir al catálogo</a>
+    <h2>Tu carrito esta vacio</h2>
+    <p>Explora el catalogo y agrega los productos que necesita tu taller.</p>
+    <a routerLink="/products">Ir al catalogo</a>
   </section>
 
   <div class="cart-layout" *ngIf="items.length > 0">
     <section class="cart-items">
       <div class="items-header">
         <strong>{{ items.length }} {{ items.length === 1 ? 'producto' : 'productos' }}</strong>
-        <span>Los precios incluyen el cálculo de IGV al confirmar.</span>
+        <span>Los precios incluyen el calculo de IGV al confirmar.</span>
       </div>
 
       <article class="cart-item" *ngFor="let item of items">
@@ -27,21 +27,39 @@
           <img *ngIf="item.product.imagenUrl" [src]="item.product.imagenUrl" [alt]="item.product.nombre" />
           <span *ngIf="!item.product.imagenUrl">{{ identificadorVisual(item.product.nombre) }}</span>
         </div>
+
         <div class="item-copy">
           <small>{{ item.product.categoria }} · {{ item.product.codigo }}</small>
           <h2>{{ item.product.nombre }}</h2>
           <p>{{ item.product.descripcion }}</p>
+
+          <strong class="cart-stock">
+            Stock disponible: {{ item.stockDisponible }}
+          </strong>
+
           <button (click)="quitarProducto(item.product.id)">Quitar</button>
         </div>
+
         <div class="quantity-control">
           <button
             aria-label="Reducir cantidad"
-            (click)="cambiarCantidad(item.product.id, item.cantidad - 1)">−</button>
+            [disabled]="item.cantidad <= 1"
+            (click)="cambiarCantidad(item.product.id, item.cantidad - 1)"
+          >
+            −
+          </button>
+
           <span>{{ item.cantidad }}</span>
+
           <button
             aria-label="Aumentar cantidad"
-            (click)="cambiarCantidad(item.product.id, item.cantidad + 1)">+</button>
+            [disabled]="item.cantidad >= item.stockDisponible"
+            (click)="cambiarCantidad(item.product.id, item.cantidad + 1)"
+          >
+            +
+          </button>
         </div>
+
         <div class="item-price">
           <small>S/ {{ item.product.precio.toFixed(2) }} c/u</small>
           <strong>S/ {{ (item.product.precio * item.cantidad).toFixed(2) }}</strong>
@@ -64,10 +82,12 @@
         <span>Subtotal</span>
         <strong>S/ {{ getSubtotal().toFixed(2) }}</strong>
       </div>
+
       <div class="summary-row">
         <span>IGV (18%)</span>
         <strong>S/ {{ getIgv().toFixed(2) }}</strong>
       </div>
+
       <div class="summary-total">
         <span>Total</span>
         <strong>S/ {{ getTotalConIgv().toFixed(2) }}</strong>
@@ -78,7 +98,8 @@
       <button class="checkout-button" [disabled]="creandoOrden" (click)="realizarPago()">
         {{ creandoOrden ? 'Preparando pedido...' : 'Continuar al pago' }}
       </button>
-      <small class="secure-copy">Pago procesado mediante una sesión protegida.</small>
+
+      <small class="secure-copy">Pago procesado mediante una sesion protegida.</small>
     </aside>
   </div>
 </main>

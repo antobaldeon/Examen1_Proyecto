@@ -80,23 +80,14 @@ export class CartComponent implements OnInit {
     };
 
     this.orderService.createOrder(orderRequest).subscribe({
-      next: (orderId) => {
-        this.orderService.getById(orderId).subscribe({
-          next: (orderResponse) => {
-            this.orderCreada = orderResponse;
-            this.creandoOrden = false;
-            this.mostrarModalPago = true;
-          },
-          error: (err) => {
-            console.error(err);
-            this.errorOrden = 'Orden creada pero no se pudo cargar el detalle.';
-            this.creandoOrden = false;
-          }
-        });
+      next: (orderResponse) => {
+        this.orderCreada = orderResponse;
+        this.creandoOrden = false;
+        this.mostrarModalPago = true;
       },
       error: (err) => {
         console.error(err);
-        this.errorOrden = 'No se pudo crear la orden. Intenta nuevamente.';
+        this.errorOrden = err?.error?.message ?? 'No se pudo crear la orden. Intenta nuevamente.';
         this.creandoOrden = false;
       }
     });

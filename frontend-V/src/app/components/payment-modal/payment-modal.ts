@@ -44,7 +44,6 @@ export class PaymentModalComponent {
 
     const request: PaymentRequest = {
       orderId: this.orderId,
-      monto: this.montoTotal,
       ...this.datos
     };
 
@@ -57,7 +56,7 @@ export class PaymentModalComponent {
       error: (err) => {
         console.error(err);
         this.enviando = false;
-        this.errorPago = 'No se pudo procesar el pago. Intenta nuevamente.';
+        this.errorPago = 'No se pudo procesar el pago. Revisa los datos o el stock disponible.';
       }
     });
   }

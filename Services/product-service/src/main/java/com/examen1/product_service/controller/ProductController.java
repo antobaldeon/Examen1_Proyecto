@@ -3,6 +3,7 @@ package com.examen1.product_service.controller;
 import com.examen1.product_service.dto.ProductRequest;
 import com.examen1.product_service.dto.ProductResponse;
 import com.examen1.product_service.service.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,31 +34,34 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<List<ProductResponse>> findAll() {
         logRequest("GET /api/v1/products");
+
         return ResponseEntity.ok()
                 .header("X-Service-Port", serverPort)
                 .body(service.getAll());
     }
+
     @GetMapping("/codigo/{codigo}")
     public ResponseEntity<ProductResponse> findByCodigo(@PathVariable String codigo) {
         logRequest("GET /api/v1/products/codigo/" + codigo);
+
         return ResponseEntity.ok()
                 .header("X-Service-Port", serverPort)
                 .body(service.getByCodigo(codigo));
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> findById(@PathVariable Long id) {
         logRequest("GET /api/v1/products/" + id);
+
         return ResponseEntity.ok()
                 .header("X-Service-Port", serverPort)
                 .body(service.getById(id));
     }
 
-
     @GetMapping("/instance")
     public ResponseEntity<Map<String, Object>> instance() {
         logRequest("GET /api/v1/products/instance");
+
         List<ServiceInstance> instances = discoveryClient.getInstances(applicationName);
 
         return ResponseEntity.ok()
@@ -70,26 +74,30 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@RequestBody ProductRequest request) {
+    public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
         logRequest("POST /api/v1/products");
+
         ProductResponse response = service.create(request);
 
         return ResponseEntity.created(
                 URI.create("/api/v1/products/" + response.getId())
-        ).build();
+        ).body(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> update(@PathVariable Long id,
-                                                  @RequestBody ProductRequest request) {
+                                                  @Valid @RequestBody ProductRequest request) {
         logRequest("PUT /api/v1/products/" + id);
+
         return ResponseEntity.ok(service.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         logRequest("DELETE /api/v1/products/" + id);
+
         service.delete(id);
+
         return ResponseEntity.noContent().build();
     }
 

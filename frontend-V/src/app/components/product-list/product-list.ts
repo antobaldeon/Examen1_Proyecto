@@ -2,9 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Inventory } from '../../models/inventory.model';
 import { Product } from '../../models/product.model';
 import { AuthService } from '../../services/auth';
 import { CartService } from '../../services/cart';
+import { InventoryService } from '../../services/inventory';
 import { ProductService } from '../../services/product';
 
 @Component({
@@ -17,6 +19,10 @@ import { ProductService } from '../../services/product';
 export class ProductListComponent implements OnInit {
   productos: Product[] = [];
   productosFiltrados: Product[] = [];
+  inventario = new Map<number, Inventory>();
+
+  productoDetalle: Product | null = null;
+
   busqueda = '';
   categoriaActiva = 'Todos';
   cargando = true;
@@ -25,6 +31,7 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
+    private inventoryService: InventoryService,
     private cartService: CartService,
     private authService: AuthService,
     private router: Router
@@ -37,6 +44,7 @@ export class ProductListComponent implements OnInit {
     }
 
     this.cargarProductos();
+    this.cargarInventario();
   }
 
   get categorias(): string[] {
@@ -56,6 +64,17 @@ export class ProductListComponent implements OnInit {
       error: () => {
         this.error = 'No pudimos cargar el catalogo. Revisa que product-service este disponible.';
         this.cargando = false;
+      }
+    });
+  }
+
+  cargarInventario(): void {
+    this.inventoryService.getAll().subscribe({
+      next: (data) => {
+        this.inventario = new Map(data.map(item => [item.productId, item]));
+      },
+      error: () => {
+        this.error = 'No pudimos cargar el stock disponible.';
       }
     });
   }
@@ -82,9 +101,32 @@ export class ProductListComponent implements OnInit {
     this.aplicarFiltros();
   }
 
+  stockDe(productId: number): number {
+    return this.inventario.get(productId)?.stockActual ?? 0;
+  }
+
+  tieneStock(producto: Product): boolean {
+    return producto.estado === 'ACTIVO' && this.stockDe(producto.id) > 0;
+  }
+
   agregarAlCarrito(producto: Product): void {
-    this.cartService.addToCart(producto);
+    const stock = this.stockDe(producto.id);
+
+    if (stock <= 0) {
+      this.mostrarMensaje('Producto sin stock disponible.');
+      return;
+    }
+
+    this.cartService.addToCart(producto, stock);
     this.mostrarMensaje(`${producto.nombre} se agrego al carrito.`);
+  }
+
+  abrirDetalle(producto: Product): void {
+    this.productoDetalle = producto;
+  }
+
+  cerrarDetalle(): void {
+    this.productoDetalle = null;
   }
 
   identificadorVisual(producto: Product): string {

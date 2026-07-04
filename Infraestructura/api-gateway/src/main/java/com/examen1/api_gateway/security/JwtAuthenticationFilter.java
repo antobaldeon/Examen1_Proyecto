@@ -57,12 +57,14 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         return "OPTIONS".equals(method)
                 || path.startsWith("/api/v1/auth/login")
                 || path.startsWith("/api/v1/usuarios/register")
-                || ("GET".equals(method) && path.startsWith("/api/v1/products"));
+                || ("GET".equals(method) && path.startsWith("/api/v1/products"))
+                || ("GET".equals(method) && path.startsWith("/api/v1/inventory"));
     }
 
     private boolean isAdminRoute(String path, String method) {
         return path.startsWith("/api/v1/usuarios")
-                || path.startsWith("/api/v1/inventory")
+                || (path.startsWith("/api/v1/inventory")
+                && ("POST".equals(method) || "PUT".equals(method) || "DELETE".equals(method)))
                 || ("GET".equals(method) && "/api/v1/orders".equals(path))
                 || (path.startsWith("/api/v1/orders/") && "PUT".equals(method))
                 || (path.startsWith("/api/v1/payments/") && "GET".equals(method))

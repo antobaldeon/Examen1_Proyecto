@@ -37,6 +37,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponse create(OrderRequest request) {
+        if (request.getDetalles() == null || request.getDetalles().isEmpty()) {
+            throw new RuntimeException("La orden debe tener al menos un producto.");
+        }
+
         Order order = new Order();
 
         order.setCodigo(generateNextCode());
@@ -60,7 +64,9 @@ public class OrderServiceImpl implements OrderService {
                 );
 
                 if (inventory.getStockActual() < detailRequest.getCantidad()) {
-                    throw new RuntimeException("Insufficient stock for product: " + product.getNombre());
+                    throw new RuntimeException(
+                            "Stock insuficiente para el producto: " + product.getNombre()
+                    );
                 }
             }
 
@@ -76,15 +82,6 @@ public class OrderServiceImpl implements OrderService {
 
             detail.setSubtotal(subtotalDetalle);
             detalles.add(detail);
-
-            StockUpdateRequest stockRequest = new StockUpdateRequest();
-            stockRequest.setCantidad(detailRequest.getCantidad());
-            stockRequest.setTipo(request.getTipo().name());
-
-            inventoryLookupService.updateInventoryStock(
-                    detailRequest.getProductId(),
-                    stockRequest
-            );
         }
 
         order.setDetalles(detalles);
@@ -101,7 +98,6 @@ public class OrderServiceImpl implements OrderService {
         order.setSubtotal(subtotalGlobal);
         order.setIgv(igvGlobal);
         order.setTotal(totalGlobal);
-        order.setEstado(OrderStatus.COMPLETADA);
 
         order = repository.save(order);
 
@@ -128,7 +124,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponse getById(Long id) {
         Order order = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada."));
 
         return toResponseWithProducts(order);
     }
@@ -137,10 +133,43 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void updateStatus(Long id, OrderStatus status) {
         Order order = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada."));
+
+        if (order.getEstado() == OrderStatus.CANCELADA) {
+            throw new RuntimeException("No se puede actualizar una orden cancelada.");
+        }
+
+        if (status == OrderStatus.PAGADA && order.getEstado() != OrderStatus.PAGADA) {
+            descontarStockDeOrden(order);
+        }
 
         order.setEstado(status);
         repository.save(order);
+    }
+
+    private void descontarStockDeOrden(Order order) {
+        if (order.getTipo() != OrderType.SALIDA) {
+            return;
+        }
+
+        for (OrderDetail detail : order.getDetalles()) {
+            Inventory inventory = inventoryLookupService.getInventoryByProductId(detail.getProductId());
+
+            if (inventory.getStockActual() < detail.getCantidad()) {
+                Product product = productLookupService.getProductById(detail.getProductId());
+                throw new RuntimeException(
+                        "Stock insuficiente para confirmar el pago del producto: " + product.getNombre()
+                );
+            }
+        }
+
+        for (OrderDetail detail : order.getDetalles()) {
+            StockUpdateRequest stockRequest = new StockUpdateRequest();
+            stockRequest.setCantidad(detail.getCantidad());
+            stockRequest.setTipo("SALIDA");
+
+            inventoryLookupService.updateInventoryStock(detail.getProductId(), stockRequest);
+        }
     }
 
     private OrderResponse toResponseWithProducts(Order order) {

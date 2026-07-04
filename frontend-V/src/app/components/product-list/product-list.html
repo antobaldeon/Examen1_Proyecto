@@ -78,46 +78,57 @@
 
     <div class="product-grid" *ngIf="!cargando">
       <article class="product-card" *ngFor="let producto of productosFiltrados">
-        <div class="product-visual" [class.has-image]="producto.imagenUrl">
-          <span class="product-category">{{ producto.categoria }}</span>
+        <button class="product-click-area" type="button" (click)="abrirDetalle(producto)">
+          <div class="product-visual" [class.has-image]="producto.imagenUrl">
+            <span class="product-category">{{ producto.categoria }}</span>
 
-          <img
-            *ngIf="producto.imagenUrl"
-            [src]="producto.imagenUrl"
-            [alt]="producto.nombre"
-          />
+            <img
+              *ngIf="producto.imagenUrl"
+              [src]="producto.imagenUrl"
+              [alt]="producto.nombre"
+            />
 
-          <strong *ngIf="!producto.imagenUrl">
-            {{ identificadorVisual(producto) }}
-          </strong>
+            <strong *ngIf="!producto.imagenUrl">
+              {{ identificadorVisual(producto) }}
+            </strong>
 
-          <small>{{ producto.codigo }}</small>
-        </div>
-
-        <div class="product-content">
-          <div class="product-title">
-            <h3>{{ producto.nombre }}</h3>
-            <span [class.inactive]="producto.estado !== 'ACTIVO'">
-              {{ producto.estado }}
-            </span>
+            <small>{{ producto.codigo }}</small>
           </div>
 
-          <p>{{ producto.descripcion }}</p>
-
-          <div class="product-footer">
-            <div>
-              <small>Precio</small>
-              <strong>S/ {{ producto.precio.toFixed(2) }}</strong>
+          <div class="product-content">
+            <div class="product-title">
+              <h3>{{ producto.nombre }}</h3>
+              <span [class.inactive]="producto.estado !== 'ACTIVO'">
+                {{ producto.estado }}
+              </span>
             </div>
 
-            <button
-              class="add-button"
-              [disabled]="producto.estado !== 'ACTIVO'"
-              (click)="agregarAlCarrito(producto)"
-            >
-              Agregar
-            </button>
+            <p>{{ producto.descripcion }}</p>
+
+            <div class="stock-line" [class.no-stock]="stockDe(producto.id) <= 0">
+              <strong *ngIf="stockDe(producto.id) > 0">
+                Stock disponible: {{ stockDe(producto.id) }}
+              </strong>
+              <strong *ngIf="stockDe(producto.id) <= 0">
+                Sin stock disponible
+              </strong>
+            </div>
           </div>
+        </button>
+
+        <div class="product-footer">
+          <div>
+            <small>Precio</small>
+            <strong>S/ {{ producto.precio.toFixed(2) }}</strong>
+          </div>
+
+          <button
+            class="add-button"
+            [disabled]="!tieneStock(producto)"
+            (click)="agregarAlCarrito(producto)"
+          >
+            {{ stockDe(producto.id) <= 0 ? 'Sin stock' : 'Agregar' }}
+          </button>
         </div>
       </article>
     </div>
@@ -137,5 +148,48 @@
     <a href="mailto:ventas@itmacfuture.com">ventas@itmacfuture.com</a>
   </section>
 </main>
+
+<div class="product-modal-backdrop" *ngIf="productoDetalle" (click)="cerrarDetalle()">
+  <section class="product-modal" (click)="$event.stopPropagation()">
+    <button class="modal-close" type="button" (click)="cerrarDetalle()">×</button>
+
+    <div class="modal-image" [class.has-image]="productoDetalle.imagenUrl">
+      <img
+        *ngIf="productoDetalle.imagenUrl"
+        [src]="productoDetalle.imagenUrl"
+        [alt]="productoDetalle.nombre"
+      />
+      <strong *ngIf="!productoDetalle.imagenUrl">
+        {{ identificadorVisual(productoDetalle) }}
+      </strong>
+    </div>
+
+    <div class="modal-content">
+      <span>{{ productoDetalle.codigo }} · {{ productoDetalle.categoria }}</span>
+      <h2>{{ productoDetalle.nombre }}</h2>
+      <p>{{ productoDetalle.descripcion }}</p>
+
+      <div class="modal-stock" [class.no-stock]="stockDe(productoDetalle.id) <= 0">
+        <strong *ngIf="stockDe(productoDetalle.id) > 0">
+          Stock disponible: {{ stockDe(productoDetalle.id) }}
+        </strong>
+        <strong *ngIf="stockDe(productoDetalle.id) <= 0">
+          Sin stock disponible
+        </strong>
+      </div>
+
+      <div class="modal-footer">
+        <strong>S/ {{ productoDetalle.precio.toFixed(2) }}</strong>
+        <button
+          class="add-button"
+          [disabled]="!tieneStock(productoDetalle)"
+          (click)="agregarAlCarrito(productoDetalle); cerrarDetalle()"
+        >
+          {{ stockDe(productoDetalle.id) <= 0 ? 'Sin stock' : 'Agregar al carrito' }}
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
 
 <div class="toast-message" *ngIf="mensaje">{{ mensaje }}</div>

@@ -20,6 +20,5 @@ public interface InventoryService {
 
     InventoryResponse updateStock(Long productId, StockUpdateRequest request);
 
-
     void delete(Long id);
 }
