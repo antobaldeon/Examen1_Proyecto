@@ -1,0 +1,119 @@
+<main class="orders-page">
+  <header class="page-header">
+    <div>
+      <span>ORDENES</span>
+      <h1>Ordenes registradas</h1>
+      <p>
+        Consulta ventas recientes, cliente, fecha, hora, estado y detalle de
+        productos.
+      </p>
+    </div>
+
+    <a routerLink="/admin">Volver al dashboard</a>
+  </header>
+
+  <section class="status-card" *ngIf="cargando">
+    <p>Cargando ordenes...</p>
+  </section>
+
+  <section class="status-card error" *ngIf="error">
+    <p>{{ error }}</p>
+  </section>
+
+  <section class="status-card success" *ngIf="mensaje">
+    <p>{{ mensaje }}</p>
+  </section>
+
+  <section class="orders-table" *ngIf="!cargando">
+    <div class="table-row header">
+      <span>Orden</span>
+      <span>Cliente</span>
+      <span>Fecha y hora</span>
+      <span>Estado</span>
+      <span>Total</span>
+      <span>Acciones</span>
+    </div>
+
+    <div class="table-row" *ngFor="let orden of ordenes">
+      <span>{{ orden.codigo || ('#' + orden.id) }}</span>
+      <span>{{ clienteOrden(orden) }}</span>
+      <span>{{ formatearFechaHora(orden.fecha) }}</span>
+      <span>
+        <b class="badge" [class]="claseEstado(orden.estado)">
+          {{ orden.estado }}
+        </b>
+      </span>
+      <span>S/ {{ orden.total.toFixed(2) }}</span>
+
+      <span class="actions">
+        <button type="button" (click)="abrirDetalle(orden)">Detalle</button>
+        <button
+          type="button"
+          class="danger"
+          [disabled]="orden.estado === 'CANCELADA'"
+          (click)="cancelarOrden(orden)"
+        >
+          Cancelar
+        </button>
+      </span>
+    </div>
+
+    <p class="empty-text" *ngIf="ordenes.length === 0">
+      No hay ordenes registradas.
+    </p>
+  </section>
+  <section class="status-card" *ngIf="cargandoDetalle">
+    <p>Cargando detalle de la orden...</p>
+  </section>
+
+  <section class="modal-backdrop" *ngIf="ordenSeleccionada">
+    <article class="boleta-modal">
+      <header class="modal-header">
+        <div>
+          <small>DETALLE DE ORDEN</small>
+          <h2>
+            Orden {{ ordenSeleccionada.codigo || ('#' + ordenSeleccionada.id) }}
+          </h2>
+          <p>{{ formatearFechaHora(ordenSeleccionada.fecha) }}</p>
+        </div>
+
+        <button type="button" class="icon-button" (click)="cerrarDetalle()">
+          Cerrar
+        </button>
+      </header>
+
+      <div class="modal-summary">
+        <p><strong>Cliente:</strong> {{ clienteOrden(ordenSeleccionada) }}</p>
+        <p><strong>Estado:</strong> {{ ordenSeleccionada.estado }}</p>
+        <p><strong>Método de entrega:</strong> Recojo en local</p>
+        <p>
+          <strong>Subtotal:</strong> S/ {{ ordenSeleccionada.subtotal.toFixed(2)
+          }}
+        </p>
+        <p><strong>IGV:</strong> S/ {{ ordenSeleccionada.igv.toFixed(2) }}</p>
+        <p>
+          <strong>Total:</strong> S/ {{ ordenSeleccionada.total.toFixed(2) }}
+        </p>
+      </div>
+
+      <div class="detail-table">
+        <div class="detail-row header">
+          <span>Producto</span>
+          <span>Cantidad</span>
+          <span>Precio</span>
+          <span>Subtotal</span>
+        </div>
+
+        <div
+          class="detail-row"
+          *ngFor="let detalle of ordenSeleccionada.detalles"
+        >
+          <span>{{ detalle.productName }}</span>
+          <span>{{ detalle.cantidad }}</span>
+          <span>S/ {{ detalle.precioUnitario.toFixed(2) }}</span>
+          <span>S/ {{ detalle.subtotal.toFixed(2) }}</span>
+        </div>
+      </div>
+    </article>
+  </section>
+</main>

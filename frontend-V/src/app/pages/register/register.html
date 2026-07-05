@@ -4,22 +4,23 @@
       <img src="/itmac-logo.svg" alt="ITMAC Future" />
     </div>
 
-    <p class="login-title">CREAR CUENTA</p>
-    <p class="login-subtitle">Registrate como cliente</p>
+    <p class="login-title">REGISTRO</p>
+    <p class="login-subtitle">Crea tu cuenta de cliente</p>
 
     <div class="login-error" *ngIf="errorMessage" role="alert">
       {{ errorMessage }}
     </div>
 
-    <div class="login-error success" *ngIf="successMessage" role="status">
+    <div class="login-success" *ngIf="successMessage" role="status">
       {{ successMessage }}
     </div>
 
-    <form (ngSubmit)="registrar()" class="login-form">
+    <form (ngSubmit)="register()" class="login-form">
       <label class="itmac-input-group">
         <span class="input-icon">N</span>
         <input
           class="itmac-input"
+          type="text"
           name="nombre"
           [(ngModel)]="request.nombre"
           placeholder="Nombre completo"
@@ -68,19 +69,19 @@
       </label>
 
       <button type="submit" class="btn-itmac" [disabled]="enviando">
-        {{ enviando ? 'Creando cuenta...' : 'Crear cuenta' }}
+        {{ enviando ? 'Creando cuenta...' : 'Registrarme' }}
       </button>
-
-      <p class="login-link-copy">
-        Ya tienes cuenta?
-        <a routerLink="/login">Acceder</a>
-      </p>
     </form>
+
+    <p class="login-register">
+      ¿Ya tienes cuenta?
+      <a routerLink="/login">Inicia sesion</a>
+    </p>
   </section>
 
   <section class="login-panel-right" aria-hidden="true">
     <div class="login-promo-card">
-      <p class="login-promo-text">Compra<br />para tu<br />taller.</p>
+      <p class="login-promo-text">Compra<br />rapido y<br />seguro.</p>
       <div class="promo-mark">
         <span>ITMAC</span>
         <small>FUTURE</small>

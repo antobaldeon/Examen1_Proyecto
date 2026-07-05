@@ -1,0 +1,94 @@
+<main class="inventory-page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">INVENTARIO</span>
+      <h1>Control de inventario</h1>
+      <p>Registra, actualiza y controla el stock disponible por producto.</p>
+    </div>
+
+    <a class="back-link" routerLink="/admin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5" />
+        <path d="M12 19l-7-7 7-7" />
+      </svg>
+      Volver al dashboard
+    </a>
+  </header>
+
+  <section class="status-card" *ngIf="cargando">
+    <p>Cargando inventario...</p>
+  </section>
+
+  <section class="status-card error" *ngIf="error">
+    <p>{{ error }}</p>
+  </section>
+
+  <section class="status-card success" *ngIf="mensaje">
+    <p>{{ mensaje }}</p>
+  </section>
+
+  <section class="inventory-layout">
+
+    <section class="inventory-table">
+      <div class="table-row header">
+        <span>Codigo</span>
+        <span>Producto</span>
+        <span>Stock</span>
+        <span>Mínimo</span>
+        <span>Ubicación</span>
+        <span>Estado</span>
+        <span>Acciones</span>
+      </div>
+
+      <div class="table-row" *ngFor="let item of inventario">
+        <span class="mono">{{ codigoProducto(item) }}</span>
+        <span class="product-name">{{ nombreProducto(item) }}</span>
+
+        <span class="stock-cell" [class.low]="item.stockActual <= item.stockMinimo">
+          <span class="stock-value mono">{{ item.stockActual }}</span>
+          <span class="stock-gauge">
+            <span [style.width.%]="item.stockMinimo > 0 ? (item.stockActual / (item.stockMinimo * 2)) * 100 : 100"></span>
+          </span>
+        </span>
+
+        <span class="mono">{{ item.stockMinimo }}</span>
+        <span class="location-cell">{{ item.ubicacion }}</span>
+
+        <span class="badge" [class]="estadoClase(item)">
+          {{ item.estado || (item.stockActual <= item.stockMinimo ? 'STOCK_BAJO' : 'DISPONIBLE') }}
+        </span>
+
+        <span class="actions">
+          <button type="button" class="icon-btn add" title="Registrar entrada" (click)="ajustarStock(item, 'ENTRADA')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+          </button>
+          <button type="button" class="icon-btn remove" title="Registrar salida" (click)="ajustarStock(item, 'SALIDA')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14" /></svg>
+          </button>
+          <button type="button" class="icon-btn" title="Editar" (click)="editar(item)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+          </button>
+          <button type="button" class="icon-btn danger" title="Eliminar" (click)="eliminar(item.id)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18" />
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            </svg>
+          </button>
+        </span>
+      </div>
+
+      <div class="empty-state" *ngIf="!cargando && inventario.length === 0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="7" width="18" height="13" rx="2" />
+          <path d="M3 7l2-4h14l2 4" />
+          <path d="M9 11h6" />
+        </svg>
+        <p>No hay registros de inventario.</p>
+      </div>
+    </section>
+  </section>
+</main>

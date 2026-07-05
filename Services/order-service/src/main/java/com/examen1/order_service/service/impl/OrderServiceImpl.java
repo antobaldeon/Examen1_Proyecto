@@ -122,6 +122,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<OrderResponse> getByUsuarioId(Long usuarioId) {
+        return repository.findByUsuarioIdOrderByFechaDesc(usuarioId)
+                .stream()
+                .map(this::toResponseWithProducts)
+                .toList();
+    }
+
+    @Override
     public OrderResponse getById(Long id) {
         Order order = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada."));
@@ -139,12 +147,22 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("No se puede actualizar una orden cancelada.");
         }
 
-        if (status == OrderStatus.PAGADA && order.getEstado() != OrderStatus.PAGADA) {
+        OrderStatus estadoActual = order.getEstado();
+
+        if (status == OrderStatus.PAGADA && estadoActual != OrderStatus.PAGADA) {
             descontarStockDeOrden(order);
+        }
+
+        if (status == OrderStatus.CANCELADA && stockFueDescontado(estadoActual)) {
+            restaurarStockDeOrden(order);
         }
 
         order.setEstado(status);
         repository.save(order);
+    }
+
+    private boolean stockFueDescontado(OrderStatus estado) {
+        return estado == OrderStatus.PAGADA || estado == OrderStatus.COMPLETADA;
     }
 
     private void descontarStockDeOrden(Order order) {
@@ -167,6 +185,20 @@ public class OrderServiceImpl implements OrderService {
             StockUpdateRequest stockRequest = new StockUpdateRequest();
             stockRequest.setCantidad(detail.getCantidad());
             stockRequest.setTipo("SALIDA");
+
+            inventoryLookupService.updateInventoryStock(detail.getProductId(), stockRequest);
+        }
+    }
+
+    private void restaurarStockDeOrden(Order order) {
+        if (order.getTipo() != OrderType.SALIDA) {
+            return;
+        }
+
+        for (OrderDetail detail : order.getDetalles()) {
+            StockUpdateRequest stockRequest = new StockUpdateRequest();
+            stockRequest.setCantidad(detail.getCantidad());
+            stockRequest.setTipo("ENTRADA");
 
             inventoryLookupService.updateInventoryStock(detail.getProductId(), stockRequest);
         }

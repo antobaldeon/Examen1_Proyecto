@@ -10,12 +10,8 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const router = inject(Router);
   const token = authService.getToken();
 
-  const isApiRequest = request.url.startsWith(API_URL);
-  const isLoginRequest = request.url.endsWith('/auth/login');
-  const isRegisterRequest = request.url.endsWith('/usuarios/register');
-
   const authenticatedRequest =
-    token && isApiRequest && !isLoginRequest && !isRegisterRequest
+    token && request.url.startsWith(API_URL) && !request.url.endsWith('/auth/login')
       ? request.clone({
           setHeaders: { Authorization: `Bearer ${token}` }
         })
@@ -23,13 +19,10 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
 
   return next(authenticatedRequest).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !isLoginRequest && !isRegisterRequest) {
+      if (error.status === 401 && !request.url.endsWith('/auth/login')) {
         authService.logout();
-        void router.navigate(['/login'], {
-          queryParams: { returnUrl: router.url || '/products' }
-        });
+        void router.navigate(['/login']);
       }
-
       return throwError(() => error);
     })
   );

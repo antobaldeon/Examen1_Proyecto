@@ -2,34 +2,45 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { RegisterRequest } from '../../models/auth.model';
-import { AuthService } from '../../services/auth';
+import { UsuarioRequest } from '../../models/usuario.model';
+import { UsuarioService } from '../../services/usuario';
 
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './register.html',
-  styleUrl: '../login/login.css'
+  styleUrl: './register.css'
 })
 export class RegisterComponent {
-  request: RegisterRequest = { nombre: '', email: '', password: '' };
+  request: UsuarioRequest = {
+    nombre: '',
+    email: '',
+    password: '',
+    rol: 'CLIENTE'
+  };
+
   confirmarPassword = '';
   errorMessage = '';
   successMessage = '';
   enviando = false;
 
   constructor(
-    private authService: AuthService,
+    private usuarioService: UsuarioService,
     private router: Router
   ) {}
 
-  registrar(): void {
+  register(): void {
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (!this.request.nombre.trim() || !this.request.email.trim() || !this.request.password) {
-      this.errorMessage = 'Completa tus datos para crear la cuenta.';
+    if (!this.request.nombre.trim()) {
+      this.errorMessage = 'Ingresa tu nombre.';
+      return;
+    }
+
+    if (!this.request.email.trim()) {
+      this.errorMessage = 'Ingresa tu correo.';
       return;
     }
 
@@ -45,15 +56,18 @@ export class RegisterComponent {
 
     this.enviando = true;
 
-    this.authService.register(this.request).subscribe({
+    this.usuarioService.register(this.request).subscribe({
       next: () => {
         this.enviando = false;
         this.successMessage = 'Cuenta creada correctamente. Ahora puedes iniciar sesion.';
-        window.setTimeout(() => void this.router.navigate(['/login']), 900);
+
+        setTimeout(() => {
+          void this.router.navigate(['/login']);
+        }, 1200);
       },
       error: () => {
         this.enviando = false;
-        this.errorMessage = 'No se pudo crear la cuenta. Verifica si el correo ya existe.';
+        this.errorMessage = 'No se pudo crear la cuenta. Verifica si el correo ya esta registrado.';
       }
     });
   }

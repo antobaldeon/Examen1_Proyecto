@@ -37,13 +37,14 @@ export class PaymentModalComponent {
   constructor(private paymentService: PaymentService) {}
 
   confirmarPago(): void {
-    if (!this.orderId) return;
+    if (!this.orderId || this.enviando || this.pagoConfirmadoOk) return;
 
     this.enviando = true;
     this.errorPago = null;
 
     const request: PaymentRequest = {
       orderId: this.orderId,
+      monto: this.montoTotal,
       ...this.datos
     };
 
@@ -55,8 +56,31 @@ export class PaymentModalComponent {
       },
       error: (err) => {
         console.error(err);
+        if (err?.status === 409) {
+          this.cargarPagoExistente();
+          return;
+        }
+
         this.enviando = false;
-        this.errorPago = 'No se pudo procesar el pago. Revisa los datos o el stock disponible.';
+        this.errorPago = err?.error?.message ?? 'No se pudo procesar el pago. Intenta nuevamente.';
+      }
+    });
+  }
+
+  private cargarPagoExistente(): void {
+    if (!this.orderId) return;
+
+    this.paymentService.getByOrderId(this.orderId).subscribe({
+      next: (response) => {
+        this.pagoData = response;
+        this.enviando = false;
+        this.errorPago = null;
+        this.pagoConfirmadoOk = true;
+      },
+      error: (err) => {
+        console.error(err);
+        this.enviando = false;
+        this.errorPago = 'La orden ya fue procesada, pero no se pudo cargar la confirmación.';
       }
     });
   }

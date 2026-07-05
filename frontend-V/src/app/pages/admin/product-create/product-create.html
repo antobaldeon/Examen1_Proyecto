@@ -2,10 +2,11 @@
   <header class="create-heading">
     <div>
       <span>ADMINISTRACION / CATALOGO</span>
-      <h1>{{ modoEdicion ? 'Editar producto' : 'Agregar producto' }}</h1>
-      <p>El codigo del producto se genera automaticamente con la secuencia IF-XXXX.</p>
+      <h1>Agregar producto</h1>
+      <p>
+        Registra la informacion comercial, una imagen y el inventario inicial.
+      </p>
     </div>
-
     <a routerLink="/admin">Volver al panel</a>
   </header>
 
@@ -34,12 +35,20 @@
         ></textarea>
       </label>
 
-      <div class="field-row">
-        <label>
-          Categoria
-          <input name="categoria" [(ngModel)]="producto.categoria" required />
-        </label>
+      <label>
+        Categoria
+        <select name="categoria" [(ngModel)]="producto.categoria" required>
+          <option value="">Selecciona una categoria</option>
+          <option
+            *ngFor="let categoria of categorias"
+            [value]="categoria.nombre"
+          >
+            {{ categoria.nombre }}
+          </option>
+        </select>
+      </label>
 
+      <div class="field-row">
         <label>
           Precio (S/)
           <input
@@ -51,15 +60,14 @@
             required
           />
         </label>
+        <label>
+          Estado
+          <select name="estado" [(ngModel)]="producto.estado">
+            <option value="ACTIVO">Activo</option>
+            <option value="INACTIVO">Inactivo</option>
+          </select>
+        </label>
       </div>
-
-      <label>
-        Estado
-        <select name="estado" [(ngModel)]="producto.estado">
-          <option value="ACTIVO">Activo</option>
-          <option value="INACTIVO">Inactivo</option>
-        </select>
-      </label>
     </section>
 
     <aside class="image-card">
@@ -77,16 +85,16 @@
           accept="image/jpeg,image/png,image/webp"
           (change)="seleccionarImagen($event)"
         />
-
         <img
           *ngIf="vistaPrevia"
           [src]="vistaPrevia"
           alt="Vista previa del producto"
         />
-
         <div *ngIf="!vistaPrevia">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M19 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 16H5l3.5-4.5 2.5 3 3.5-4.5L19 19ZM8.5 11A2.5 2.5 0 1 1 8.5 6a2.5 2.5 0 0 1 0 5Z"/>
+            <path
+              d="M19 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 16H5l3.5-4.5 2.5 3 3.5-4.5L19 19ZM8.5 11A2.5 2.5 0 1 1 8.5 6a2.5 2.5 0 0 1 0 5Z"
+            />
           </svg>
           <strong>Seleccionar imagen</strong>
           <span>JPG, PNG o WebP - maximo 8 MB</span>
@@ -98,14 +106,13 @@
         <button type="button" (click)="quitarImagen()">Quitar</button>
       </div>
 
-      <div class="inventory-block" *ngIf="!modoEdicion">
+      <div class="inventory-block">
         <div class="card-heading compact">
           <span>03</span>
           <div>
             <h2>Inventario inicial</h2>
           </div>
         </div>
-
         <div class="field-row">
           <label>
             Stock actual
@@ -117,7 +124,6 @@
               required
             />
           </label>
-
           <label>
             Stock minimo
             <input
@@ -129,7 +135,6 @@
             />
           </label>
         </div>
-
         <label>
           Ubicacion
           <input name="ubicacion" [(ngModel)]="inventario.ubicacion" required />
@@ -139,12 +144,10 @@
 
     <div class="form-footer">
       <p class="form-error" *ngIf="error">{{ error }}</p>
-
       <div>
         <a routerLink="/admin">Cancelar</a>
-
         <button type="submit" [disabled]="guardando">
-          {{ guardando ? 'Guardando...' : (modoEdicion ? 'Actualizar producto' : 'Guardar producto') }}
+          {{ guardando ? 'Guardando...' : 'Guardar producto' }}
         </button>
       </div>
     </div>

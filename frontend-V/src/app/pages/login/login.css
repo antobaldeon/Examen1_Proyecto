@@ -187,22 +187,3 @@
     display: none;
   }
 }
-
-.login-link-copy {
-  width: 100%;
-  margin: 0.4rem 0 1rem;
-  color: #666;
-  font-size: 0.88rem;
-  text-align: center;
-}
-
-.login-link-copy a {
-  color: var(--itmac-red);
-  font-weight: 800;
-  text-decoration: none;
-}
-
-.login-error.success {
-  background: #e8f8ef;
-  color: #146c43;
-}

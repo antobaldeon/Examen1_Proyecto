@@ -58,7 +58,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 || path.startsWith("/api/v1/auth/login")
                 || path.startsWith("/api/v1/usuarios/register")
                 || ("GET".equals(method) && path.startsWith("/api/v1/products"))
-                || ("GET".equals(method) && path.startsWith("/api/v1/inventory"));
+                || ("GET".equals(method) && path.startsWith("/api/v1/inventory"))
+                || ("GET".equals(method) && path.startsWith("/api/v1/categorias"));
     }
 
     private boolean isAdminRoute(String path, String method) {

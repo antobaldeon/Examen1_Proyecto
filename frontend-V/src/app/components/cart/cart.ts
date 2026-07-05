@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { CartItem } from '../../models/cart-item.model';
+import { Inventory } from '../../models/inventory.model';
 import { CartService } from '../../services/cart';
+import { InventoryService } from '../../services/inventory';
 import { OrderService } from '../../services/order';
+import { AuthService } from '../../services/auth';
 import { OrderRequest, OrderResponse } from '../../models/order.model';
 import { PaymentModalComponent } from '../payment-modal/payment-modal';
-import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-cart',
@@ -21,21 +23,19 @@ export class CartComponent implements OnInit {
   orderCreada: OrderResponse | null = null;
   creandoOrden = false;
   errorOrden: string | null = null;
+  inventario = new Map<number, Inventory>();
 
   constructor(
     private cartService: CartService,
+    private inventoryService: InventoryService,
     private orderService: OrderService,
     private authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    if (this.authService.isAdmin()) {
-      void this.router.navigate(['/admin']);
-      return;
-    }
-
     this.cartService.items$.subscribe(items => this.items = items);
+    this.cargarInventario();
   }
 
   quitarProducto(productId: number): void {
@@ -43,7 +43,9 @@ export class CartComponent implements OnInit {
   }
 
   cambiarCantidad(productId: number, cantidad: number): void {
-    this.cartService.updateCantidad(productId, cantidad);
+    const stock = this.stockDe(productId);
+    const cantidadValidada = stock === null ? cantidad : Math.min(cantidad, stock);
+    this.cartService.updateCantidad(productId, cantidadValidada);
   }
 
   getTotal(): number {
@@ -53,26 +55,26 @@ export class CartComponent implements OnInit {
   realizarPago(): void {
     if (this.items.length === 0) return;
 
-    if (!this.authService.isLoggedIn()) {
-      void this.router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+    if (!this.puedePagar()) {
+      this.errorOrden = 'Hay productos sin stock suficiente. Ajusta las cantidades antes de continuar.';
       return;
     }
 
-    if (this.authService.isAdmin()) {
-      this.errorOrden = 'Los administradores no pueden realizar compras.';
+    const usuario = this.authService.getUsuarioActual();
+
+    if (!usuario) {
+      this.errorOrden = 'No se pudo identificar al cliente. Inicia sesion nuevamente.';
       return;
     }
 
     this.creandoOrden = true;
     this.errorOrden = null;
 
-    const email = this.authService.getEmail() ?? '';
-
     const orderRequest: OrderRequest = {
       tipo: 'SALIDA',
-      usuarioId: this.authService.getUserId() ?? undefined,
-      usuarioNombre: this.authService.getNombre() || email.split('@')[0],
-      usuarioEmail: email,
+      usuarioId: usuario.id,
+      usuarioNombre: usuario.nombre,
+      usuarioEmail: usuario.email,
       detalles: this.items.map(i => ({
         productId: i.product.id,
         cantidad: i.cantidad
@@ -80,14 +82,23 @@ export class CartComponent implements OnInit {
     };
 
     this.orderService.createOrder(orderRequest).subscribe({
-      next: (orderResponse) => {
-        this.orderCreada = orderResponse;
-        this.creandoOrden = false;
-        this.mostrarModalPago = true;
+      next: (orderId) => {
+        this.orderService.getById(orderId).subscribe({
+          next: (orderResponse) => {
+            this.orderCreada = orderResponse;
+            this.creandoOrden = false;
+            this.mostrarModalPago = true;
+          },
+          error: (err) => {
+            console.error(err);
+            this.errorOrden = 'Orden creada pero no se pudo cargar el detalle.';
+            this.creandoOrden = false;
+          }
+        });
       },
       error: (err) => {
         console.error(err);
-        this.errorOrden = err?.error?.message ?? 'No se pudo crear la orden. Intenta nuevamente.';
+        this.errorOrden = 'No se pudo crear la orden. Intenta nuevamente.';
         this.creandoOrden = false;
       }
     });
@@ -126,5 +137,37 @@ export class CartComponent implements OnInit {
       .map((palabra) => palabra.charAt(0))
       .join('')
       .toUpperCase();
+  }
+
+  stockDe(productId: number): number | null {
+    return this.inventario.get(productId)?.stockActual ?? null;
+  }
+
+  sinStock(item: CartItem): boolean {
+    const stock = this.stockDe(item.product.id);
+    return stock !== null && stock <= 0;
+  }
+
+  superaStock(item: CartItem): boolean {
+    const stock = this.stockDe(item.product.id);
+    return stock !== null && item.cantidad > stock;
+  }
+
+  puedePagar(): boolean {
+    return this.items.length > 0 && this.items.every(item => {
+      const stock = this.stockDe(item.product.id);
+      return stock !== null && stock > 0 && item.cantidad <= stock;
+    });
+  }
+
+  private cargarInventario(): void {
+    this.inventoryService.getAll().subscribe({
+      next: (data) => {
+        this.inventario = new Map(data.map((item) => [item.productId, item]));
+      },
+      error: () => {
+        this.errorOrden = 'No se pudo verificar el stock del carrito.';
+      }
+    });
   }
 }

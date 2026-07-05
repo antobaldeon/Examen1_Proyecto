@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { finalize, of, switchMap } from 'rxjs';
+import { Router, RouterLink } from '@angular/router';
+import { finalize, switchMap } from 'rxjs';
+import { Categoria } from '../../../models/categoria.model';
 import { InventoryRequest } from '../../../models/inventory.model';
 import { ProductRequest } from '../../../models/product.model';
+import { CategoriaService } from '../../../services/categoria';
 import { InventoryService } from '../../../services/inventory';
 import { ProductService } from '../../../services/product';
 
@@ -16,13 +18,14 @@ import { ProductService } from '../../../services/product';
   styleUrl: './product-create.css'
 })
 export class ProductCreateComponent implements OnInit {
-  productId: number | null = null;
+  categorias: Categoria[] = [];
 
   producto: ProductRequest = {
     nombre: '',
     descripcion: '',
     categoria: '',
     precio: 0,
+    codigo: '',
     estado: 'ACTIVO',
     imagenUrl: ''
   };
@@ -41,48 +44,19 @@ export class ProductCreateComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private inventoryService: InventoryService,
-    private route: ActivatedRoute,
+    private categoriaService: CategoriaService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-
-    if (Number.isFinite(id) && id > 0) {
-      this.productId = id;
-
-      this.productService.getById(id).subscribe({
-        next: (producto) => {
-          this.producto = {
-            nombre: producto.nombre,
-            descripcion: producto.descripcion,
-            categoria: producto.categoria,
-            precio: producto.precio,
-            estado: producto.estado,
-            imagenUrl: producto.imagenUrl
-          };
-
-          this.vistaPrevia = producto.imagenUrl ?? '';
-        },
-        error: () => {
-          this.error = 'No se pudo cargar el producto.';
-        }
-      });
-
-      this.inventoryService.getByProductId(id).subscribe({
-        next: (inventory) => {
-          this.inventario = {
-            stockActual: inventory.stockActual,
-            stockMinimo: inventory.stockMinimo,
-            ubicacion: inventory.ubicacion
-          };
-        }
-      });
-    }
-  }
-
-  get modoEdicion(): boolean {
-    return this.productId !== null;
+    this.categoriaService.getActivas().subscribe({
+      next: (categorias) => {
+        this.categorias = categorias;
+      },
+      error: () => {
+        this.error = 'No se pudieron cargar las categorias.';
+      }
+    });
   }
 
   seleccionarImagen(event: Event): void {
@@ -108,7 +82,16 @@ export class ProductCreateComponent implements OnInit {
     this.nombreArchivo = file.name;
 
     const reader = new FileReader();
-    reader.onload = () => this.optimizarImagen(String(reader.result));
+
+    reader.onload = () => {
+      this.optimizarImagen(String(reader.result));
+    };
+
+    reader.onerror = () => {
+      this.error = 'No se pudo leer la imagen.';
+      input.value = '';
+    };
+
     reader.readAsDataURL(file);
   }
 
@@ -128,28 +111,37 @@ export class ProductCreateComponent implements OnInit {
 
     this.guardando = true;
 
-    const save$ = this.productId
-      ? this.productService.update(this.productId, this.producto)
-      : this.productService.create(this.producto);
+    const producto: ProductRequest = {
+      ...this.producto,
+      nombre: this.producto.nombre.trim(),
+      descripcion: this.producto.descripcion.trim(),
+      categoria: this.producto.categoria.trim(),
+      codigo: this.producto.codigo.trim()
+    };
 
-    save$
+    this.productService
+      .create(producto)
       .pipe(
-        switchMap((product) => {
-          if (this.productId) return of(null);
-
+        switchMap((productId) => {
           const inventory: InventoryRequest = {
-            productId: product.id,
-            ...this.inventario
+            productId,
+            stockActual: this.inventario.stockActual,
+            stockMinimo: this.inventario.stockMinimo,
+            ubicacion: this.inventario.ubicacion.trim()
           };
 
           return this.inventoryService.create(inventory);
         }),
-        finalize(() => (this.guardando = false))
+        finalize(() => {
+          this.guardando = false;
+        })
       )
       .subscribe({
-        next: () => void this.router.navigate(['/admin']),
-        error: (err) => {
-          this.error = err?.error?.message ?? 'No se pudo guardar. Revisa que los servicios esten activos.';
+        next: () => {
+          void this.router.navigate(['/products']);
+        },
+        error: () => {
+          this.error = 'No se pudo guardar. Revisa que el codigo no este repetido y que los servicios esten activos.';
         }
       });
   }
@@ -188,18 +180,23 @@ export class ProductCreateComponent implements OnInit {
       this.producto.imagenUrl = optimized;
     };
 
+    image.onerror = () => {
+      this.error = 'No se pudo procesar la imagen.';
+      this.quitarImagen();
+    };
+
     image.src = dataUrl;
   }
 
   private formularioValido(): boolean {
-    return Boolean(
-      this.producto.nombre.trim() &&
-        this.producto.descripcion.trim() &&
-        this.producto.categoria.trim() &&
-        this.producto.precio >= 0 &&
-        this.inventario.stockActual >= 0 &&
-        this.inventario.stockMinimo >= 0 &&
-        this.inventario.ubicacion.trim()
-    );
-  }
+  return Boolean(
+    this.producto.nombre.trim() &&
+      this.producto.descripcion.trim() &&
+      this.producto.categoria.trim() &&
+      this.producto.precio >= 0 &&
+      this.inventario.stockActual >= 0 &&
+      this.inventario.stockMinimo >= 0 &&
+      this.inventario.ubicacion.trim()
+  );
+}
 }
