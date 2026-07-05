@@ -5,11 +5,10 @@
       <h1>Todo para que tu taller siga avanzando.</h1>
       <p>
         Repuestos y herramientas seleccionados para el trabajo diario.
-        Compra simple, atencion directa y precios claros.
+        Compra simple, atención directa y precios claros.
       </p>
-      <a class="hero-cta" href="#catalogo">Ver catalogo</a>
+      <a class="hero-cta" href="#catalogo">Ver catálogo</a>
     </div>
-
     <div class="hero-visual">
       <div class="hero-number">01</div>
       <div class="tool-shape">
@@ -24,22 +23,22 @@
   <section class="service-strip" aria-label="Beneficios">
     <article>
       <strong>Compra segura</strong>
-      <span>Tu sesion y tus pedidos estan protegidos.</span>
+      <span>Tu sesión y tus pedidos están protegidos.</span>
     </article>
     <article>
-      <strong>Catalogo especializado</strong>
+      <strong>Catálogo especializado</strong>
       <span>Productos pensados para taller y mantenimiento.</span>
     </article>
     <article>
-      <strong>Atencion directa</strong>
-      <span>Informacion clara antes de confirmar tu compra.</span>
+      <strong>Atención directa</strong>
+      <span>Información clara antes de confirmar tu compra.</span>
     </article>
   </section>
 
   <section class="catalog-section" id="catalogo">
     <div class="section-heading">
       <div>
-        <span class="eyebrow">CATALOGO ITMAC</span>
+        <span class="eyebrow">CATÁLOGO ITMAC</span>
         <h2>Encuentra lo que necesitas</h2>
       </div>
     </div>
@@ -49,18 +48,16 @@
         <span aria-hidden="true">⌕</span>
         <input
           type="search"
-          placeholder="Buscar producto, categoria o codigo"
+          placeholder="Buscar producto, categoría o código"
           [(ngModel)]="busqueda"
           (input)="aplicarFiltros()"
         />
       </div>
-
       <div class="category-list">
         <button
           *ngFor="let categoria of categorias"
           [class.active]="categoriaActiva === categoria"
-          (click)="seleccionarCategoria(categoria)"
-        >
+          (click)="seleccionarCategoria(categoria)">
           {{ categoria }}
         </button>
       </div>
@@ -68,7 +65,7 @@
 
     <div class="status-card" *ngIf="cargando">
       <span class="loader"></span>
-      <p>Cargando catalogo...</p>
+      <p>Cargando catálogo...</p>
     </div>
 
     <div class="status-card error" *ngIf="error">
@@ -77,57 +74,49 @@
     </div>
 
     <div class="product-grid" *ngIf="!cargando">
-      <article class="product-card" *ngFor="let producto of productosFiltrados">
-        <button class="product-click-area" type="button" (click)="abrirDetalle(producto)">
-          <div class="product-visual" [class.has-image]="producto.imagenUrl">
-            <span class="product-category">{{ producto.categoria }}</span>
+      <article
+        class="product-card"
+        [class.unavailable]="!estaDisponible(producto)"
+        *ngFor="let producto of productosFiltrados"
+        role="button"
+        tabindex="0"
+        (click)="verDetalle(producto)"
+        (keydown.enter)="verDetalle(producto)">
+        <div class="product-visual" [class.has-image]="producto.imagenUrl">
+          <span class="product-category">{{ producto.categoria }}</span>
+          <img *ngIf="producto.imagenUrl" [src]="producto.imagenUrl" [alt]="producto.nombre" />
+          <strong *ngIf="!producto.imagenUrl">{{ identificadorVisual(producto) }}</strong>
+          <small>{{ producto.codigo }}</small>
+        </div>
+        <div class="product-content">
+          <div class="product-title">
+            <h3>{{ producto.nombre }}</h3>
+            <span [class.inactive]="!estaDisponible(producto)">
+              {{ estaDisponible(producto) ? producto.estado : 'NO DISPONIBLE' }}
+            </span>
+          </div>
+          <p>{{ producto.descripcion }}</p>
 
-            <img
-              *ngIf="producto.imagenUrl"
-              [src]="producto.imagenUrl"
-              [alt]="producto.nombre"
-            />
-
-            <strong *ngIf="!producto.imagenUrl">
-              {{ identificadorVisual(producto) }}
-            </strong>
-
-            <small>{{ producto.codigo }}</small>
+          <div class="product-stock">
+            <span>Stock: <strong>{{ stockDe(producto.id) ?? '—' }}</strong></span>
+            <button *ngIf="esAdmin" (click)="reponerStock(producto.id)">+1 unidad</button>
           </div>
 
-          <div class="product-content">
-            <div class="product-title">
-              <h3>{{ producto.nombre }}</h3>
-              <span [class.inactive]="producto.estado !== 'ACTIVO'">
-                {{ producto.estado }}
-              </span>
+          <div class="product-footer">
+            <div>
+              <small>Precio</small>
+              <strong>S/ {{ producto.precio.toFixed(2) }}</strong>
             </div>
-
-            <p>{{ producto.descripcion }}</p>
-
-            <div class="stock-line" [class.no-stock]="stockDe(producto.id) <= 0">
-              <strong *ngIf="stockDe(producto.id) > 0">
-                Stock disponible: {{ stockDe(producto.id) }}
-              </strong>
-              <strong *ngIf="stockDe(producto.id) <= 0">
-                Sin stock disponible
-              </strong>
-            </div>
-          </div>
-        </button>
-
-        <div class="product-footer">
-          <div>
-            <small>Precio</small>
-            <strong>S/ {{ producto.precio.toFixed(2) }}</strong>
+            <button
+              class="add-button"
+              [disabled]="!estaDisponible(producto)"
+              (click)="$event.stopPropagation(); agregarAlCarrito(producto)">
+              {{ estaDisponible(producto) ? 'Agregar' : 'Sin stock' }}
+            </button>
           </div>
 
-          <button
-            class="add-button"
-            [disabled]="!tieneStock(producto)"
-            (click)="agregarAlCarrito(producto)"
-          >
-            {{ stockDe(producto.id) <= 0 ? 'Sin stock' : 'Agregar' }}
+          <button class="delete-button" *ngIf="esAdmin" (click)="$event.stopPropagation(); eliminarProducto(producto)">
+            Eliminar producto
           </button>
         </div>
       </article>
@@ -135,61 +124,18 @@
 
     <div class="empty-state" *ngIf="!cargando && productosFiltrados.length === 0">
       <strong>No encontramos productos</strong>
-      <p>Prueba con otra categoria o cambia tu busqueda.</p>
+      <p>Prueba con otra categoría o cambia tu búsqueda.</p>
     </div>
   </section>
 
   <section class="contact-strip" id="contacto">
     <img src="/itmac-logo.svg" alt="ITMAC Future" />
     <div>
-      <strong>Necesitas ayuda para elegir?</strong>
+      <strong>¿Necesitas ayuda para elegir?</strong>
       <span>Consulta con nuestro equipo antes de realizar tu pedido.</span>
     </div>
     <a href="mailto:ventas@itmacfuture.com">ventas@itmacfuture.com</a>
   </section>
 </main>
-
-<div class="product-modal-backdrop" *ngIf="productoDetalle" (click)="cerrarDetalle()">
-  <section class="product-modal" (click)="$event.stopPropagation()">
-    <button class="modal-close" type="button" (click)="cerrarDetalle()">×</button>
-
-    <div class="modal-image" [class.has-image]="productoDetalle.imagenUrl">
-      <img
-        *ngIf="productoDetalle.imagenUrl"
-        [src]="productoDetalle.imagenUrl"
-        [alt]="productoDetalle.nombre"
-      />
-      <strong *ngIf="!productoDetalle.imagenUrl">
-        {{ identificadorVisual(productoDetalle) }}
-      </strong>
-    </div>
-
-    <div class="modal-content">
-      <span>{{ productoDetalle.codigo }} · {{ productoDetalle.categoria }}</span>
-      <h2>{{ productoDetalle.nombre }}</h2>
-      <p>{{ productoDetalle.descripcion }}</p>
-
-      <div class="modal-stock" [class.no-stock]="stockDe(productoDetalle.id) <= 0">
-        <strong *ngIf="stockDe(productoDetalle.id) > 0">
-          Stock disponible: {{ stockDe(productoDetalle.id) }}
-        </strong>
-        <strong *ngIf="stockDe(productoDetalle.id) <= 0">
-          Sin stock disponible
-        </strong>
-      </div>
-
-      <div class="modal-footer">
-        <strong>S/ {{ productoDetalle.precio.toFixed(2) }}</strong>
-        <button
-          class="add-button"
-          [disabled]="!tieneStock(productoDetalle)"
-          (click)="agregarAlCarrito(productoDetalle); cerrarDetalle()"
-        >
-          {{ stockDe(productoDetalle.id) <= 0 ? 'Sin stock' : 'Agregar al carrito' }}
-        </button>
-      </div>
-    </div>
-  </section>
-</div>
 
 <div class="toast-message" *ngIf="mensaje">{{ mensaje }}</div>

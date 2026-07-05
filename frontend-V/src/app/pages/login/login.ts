@@ -19,13 +19,13 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
-      void this.router.navigate([this.authService.isAdmin() ? '/admin' : this.returnUrl]);
+      void this.router.navigateByUrl(this.destinationAfterLogin(this.authService.getRol()));
     }
   }
 
@@ -33,7 +33,7 @@ export class LoginComponent implements OnInit {
     this.errorMessage = '';
 
     if (!this.request.email.trim() || !this.request.password) {
-      this.errorMessage = 'Completa el correo y la contrasena.';
+      this.errorMessage = 'Completa el correo y la contraseña.';
       return;
     }
 
@@ -42,7 +42,7 @@ export class LoginComponent implements OnInit {
       next: (response) => {
         this.authService.saveSession(response);
         this.enviando = false;
-        void this.router.navigate([response.rol === 'ADMIN' ? '/admin' : this.returnUrl]);
+        void this.router.navigateByUrl(this.destinationAfterLogin(response.rol));
       },
       error: () => {
         this.enviando = false;
@@ -51,8 +51,15 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  private get returnUrl(): string {
-    const value = this.route.snapshot.queryParamMap.get('returnUrl');
-    return value && value.startsWith('/') ? value : '/products';
+  private returnUrl(): string {
+    return this.route.snapshot.queryParamMap.get('returnUrl') || '/products';
+  }
+
+  private destinationAfterLogin(rol: string | null): string {
+    if (rol === 'ADMIN') {
+      return '/admin';
+    }
+
+    return this.returnUrl();
   }
 }

@@ -1,5 +1,6 @@
 export interface PaymentRequest {
   orderId: number;
+  monto: number;
   nombreCompleto: string;
   numeroTarjeta: string;
   fechaExpiracion: string;

@@ -1,0 +1,116 @@
+<main class="products-admin-page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">CATALOGO</span>
+      <h1>Productos</h1>
+      <p>Administra productos, codigos, precios, categorias y estados.</p>
+    </div>
+
+    <div class="header-actions">
+      <a class="secondary-link" routerLink="/admin">Volver al dashboard</a>
+      <a class="primary-link" routerLink="/admin/products/new">Nuevo producto</a>
+    </div>
+  </header>
+
+  <section class="status-card" *ngIf="cargando">
+    <p>Cargando productos...</p>
+  </section>
+
+  <section class="status-card error" *ngIf="error">
+    <p>{{ error }}</p>
+  </section>
+
+  <section class="status-card success" *ngIf="mensaje">
+    <p>{{ mensaje }}</p>
+  </section>
+
+  <section class="products-table" *ngIf="!cargando">
+    <div class="table-row header">
+      <span>Codigo</span>
+      <span>Producto</span>
+      <span>Categoria</span>
+      <span>Precio</span>
+      <span>Estado</span>
+      <span>Acciones</span>
+    </div>
+
+    <div class="table-row" *ngFor="let producto of productos">
+      <span class="mono">{{ producto.codigo }}</span>
+      <span>
+        <strong>{{ producto.nombre }}</strong>
+        <small>{{ producto.descripcion }}</small>
+      </span>
+      <span>{{ producto.categoria }}</span>
+      <span>S/ {{ producto.precio.toFixed(2) }}</span>
+      <span>
+        <b class="badge" [class]="claseEstado(producto.estado)">{{ producto.estado }}</b>
+      </span>
+      <span class="actions">
+        <button type="button" (click)="editar(producto)">Editar</button>
+        <button type="button" class="danger" (click)="eliminar(producto)">Eliminar</button>
+      </span>
+    </div>
+
+    <p class="empty-text" *ngIf="productos.length === 0">
+      No hay productos registrados.
+    </p>
+  </section>
+
+  <section class="modal-backdrop" *ngIf="productoEditando">
+    <article class="edit-modal">
+      <header class="modal-header">
+        <div>
+          <small>EDITAR PRODUCTO</small>
+          <h2>{{ productoEditando.nombre }}</h2>
+          <p>Codigo: {{ productoEditando.codigo }}</p>
+        </div>
+
+        <button type="button" class="ghost-button" (click)="cerrarEdicion()">Cerrar</button>
+      </header>
+
+      <form class="edit-form" (ngSubmit)="guardarEdicion()">
+        <label>
+          Nombre
+          <input name="nombre" [(ngModel)]="formulario.nombre" required />
+        </label>
+
+        <label>
+          Descripcion
+          <textarea name="descripcion" rows="3" [(ngModel)]="formulario.descripcion" required></textarea>
+        </label>
+
+        <div class="field-row">
+          <label>
+            Categoria
+            <select name="categoria" [(ngModel)]="formulario.categoria" required>
+              <option value="">Selecciona una categoria</option>
+              <option *ngFor="let categoria of categorias" [value]="categoria.nombre">
+                {{ categoria.nombre }}
+              </option>
+            </select>
+          </label>
+
+          <label>
+            Precio
+            <input type="number" min="0" step="0.01" name="precio" [(ngModel)]="formulario.precio" required />
+          </label>
+        </div>
+
+        <label>
+          Estado
+          <select name="estado" [(ngModel)]="formulario.estado">
+            <option value="ACTIVO">Activo</option>
+            <option value="INACTIVO">Inactivo</option>
+          </select>
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="ghost-button" (click)="cerrarEdicion()">Cancelar</button>
+          <button type="submit" [disabled]="guardando">
+            {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+        </div>
+      </form>
+    </article>
+  </section>
+</main>

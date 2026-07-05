@@ -20,9 +20,6 @@ export class ProductListComponent implements OnInit {
   productos: Product[] = [];
   productosFiltrados: Product[] = [];
   inventario = new Map<number, Inventory>();
-
-  productoDetalle: Product | null = null;
-
   busqueda = '';
   categoriaActiva = 'Todos';
   cargando = true;
@@ -38,13 +35,16 @@ export class ProductListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (this.authService.isAdmin()) {
+    if (this.esAdmin) {
       void this.router.navigate(['/admin']);
       return;
     }
 
     this.cargarProductos();
-    this.cargarInventario();
+  }
+
+  get esAdmin(): boolean {
+    return this.authService.getRol() === 'ADMIN';
   }
 
   get categorias(): string[] {
@@ -54,15 +54,15 @@ export class ProductListComponent implements OnInit {
   cargarProductos(): void {
     this.cargando = true;
     this.error = null;
-
     this.productService.getAll().subscribe({
       next: (data) => {
         this.productos = data;
         this.aplicarFiltros();
         this.cargando = false;
+        this.cargarInventario();
       },
       error: () => {
-        this.error = 'No pudimos cargar el catalogo. Revisa que product-service este disponible.';
+        this.error = 'No pudimos cargar el catálogo. Revisa que product-service esté disponible.';
         this.cargando = false;
       }
     });
@@ -71,27 +71,21 @@ export class ProductListComponent implements OnInit {
   cargarInventario(): void {
     this.inventoryService.getAll().subscribe({
       next: (data) => {
-        this.inventario = new Map(data.map(item => [item.productId, item]));
-      },
-      error: () => {
-        this.error = 'No pudimos cargar el stock disponible.';
+        this.inventario = new Map(data.map((item) => [item.productId, item]));
       }
     });
   }
 
   aplicarFiltros(): void {
     const termino = this.busqueda.trim().toLowerCase();
-
     this.productosFiltrados = this.productos.filter((producto) => {
       const coincideCategoria =
         this.categoriaActiva === 'Todos' || producto.categoria === this.categoriaActiva;
-
       const coincideTexto =
         !termino ||
         producto.nombre.toLowerCase().includes(termino) ||
         producto.categoria.toLowerCase().includes(termino) ||
         producto.codigo.toLowerCase().includes(termino);
-
       return coincideCategoria && coincideTexto;
     });
   }
@@ -101,32 +95,50 @@ export class ProductListComponent implements OnInit {
     this.aplicarFiltros();
   }
 
-  stockDe(productId: number): number {
-    return this.inventario.get(productId)?.stockActual ?? 0;
-  }
-
-  tieneStock(producto: Product): boolean {
-    return producto.estado === 'ACTIVO' && this.stockDe(producto.id) > 0;
+  verDetalle(producto: Product): void {
+    void this.router.navigate(['/products', producto.id]);
   }
 
   agregarAlCarrito(producto: Product): void {
-    const stock = this.stockDe(producto.id);
-
-    if (stock <= 0) {
-      this.mostrarMensaje('Producto sin stock disponible.');
+    if (!this.estaDisponible(producto)) {
+      this.mostrarMensaje(`${producto.nombre} no esta disponible.`);
       return;
     }
 
-    this.cartService.addToCart(producto, stock);
-    this.mostrarMensaje(`${producto.nombre} se agrego al carrito.`);
+    this.cartService.addToCart(producto);
+    this.mostrarMensaje(`${producto.nombre} se agregó al carrito.`);
   }
 
-  abrirDetalle(producto: Product): void {
-    this.productoDetalle = producto;
+  reponerStock(productId: number): void {
+    this.inventoryService.addStock(productId, 1).subscribe({
+      next: (inventory) => {
+        this.inventario.set(productId, inventory);
+        this.inventario = new Map(this.inventario);
+        this.mostrarMensaje('Se agregó una unidad al inventario.');
+      },
+      error: () => (this.error = 'No se pudo actualizar el stock.')
+    });
   }
 
-  cerrarDetalle(): void {
-    this.productoDetalle = null;
+  eliminarProducto(producto: Product): void {
+    if (!confirm(`¿Eliminar "${producto.nombre}" del catálogo?`)) return;
+
+    this.productService.delete(producto.id).subscribe({
+      next: () => {
+        this.mostrarMensaje('Producto eliminado.');
+        this.cargarProductos();
+      },
+      error: () => (this.error = 'No se puede eliminar un producto que ya tiene movimientos.')
+    });
+  }
+
+  stockDe(productId: number): number | null {
+    return this.inventario.get(productId)?.stockActual ?? null;
+  }
+
+  estaDisponible(producto: Product): boolean {
+    const stock = this.stockDe(producto.id);
+    return producto.estado === 'ACTIVO' && stock !== null && stock > 0;
   }
 
   identificadorVisual(producto: Product): string {

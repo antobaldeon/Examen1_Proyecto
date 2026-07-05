@@ -3,268 +3,181 @@
     <div>
       <span>ADMINISTRACION</span>
       <h1>Panel de control</h1>
-      <p>Gestiona productos, inventario, ordenes y reportes desde un solo lugar.</p>
+      <p>Resumen general de productos, ventas, pagos, inventario y ordenes recientes.</p>
+      <small>{{ fechaFormateada }}</small>
     </div>
 
-    <a routerLink="/admin/products/new">Agregar producto</a>
+    <a routerLink="/products">Volver a la tienda</a>
   </header>
 
-  <nav class="admin-tabs">
-    <button [class.active]="tab === 'reportes'" (click)="cambiarTab('reportes')">
-      Reportes
-    </button>
-    <button [class.active]="tab === 'productos'" (click)="cambiarTab('productos')">
-      Productos
-    </button>
-    <button [class.active]="tab === 'inventario'" (click)="cambiarTab('inventario')">
-      Inventario
-    </button>
-    <button [class.active]="tab === 'ordenes'" (click)="cambiarTab('ordenes')">
-      Ordenes
-    </button>
-  </nav>
+  <section class="status-card" *ngIf="cargando">
+    <p>Cargando informacion del dashboard...</p>
+  </section>
 
-  <p class="admin-message" *ngIf="mensaje">{{ mensaje }}</p>
-  <p class="admin-error" *ngIf="error">{{ error }}</p>
+  <section class="status-card error" *ngIf="error">
+    <p>{{ error }}</p>
+    <button (click)="cargarDashboard()">Reintentar</button>
+  </section>
 
-  <section *ngIf="tab === 'reportes'" class="admin-section reports-section">
-    <div class="reports-grid">
-      <article>
-        <span>Productos</span>
+  <ng-container *ngIf="!cargando && !error">
+    <section class="summary-grid">
+      <article class="summary-card">
+        <small>PRODUCTOS</small>
         <strong>{{ cantidadProductos }}</strong>
+        <span>Registrados en catalogo</span>
       </article>
 
-      <article>
-        <span>Ventas totales</span>
+      <article class="summary-card">
+        <small>VENTAS</small>
         <strong>S/ {{ ventasTotales.toFixed(2) }}</strong>
+        <span>Total de ordenes pagadas</span>
       </article>
 
-      <article>
-        <span>Pagos realizados</span>
+      <article class="summary-card">
+        <small>PAGOS</small>
         <strong>{{ pagosRealizados }}</strong>
+        <span>Pagos realizados</span>
       </article>
 
-      <article [class.warning]="productosStockBajo.length > 0">
-        <span>Stock bajo</span>
+      <article class="summary-card warning">
+        <small>STOCK BAJO</small>
         <strong>{{ productosStockBajo.length }}</strong>
+        <span>Productos por revisar</span>
       </article>
-    </div>
 
-    <div class="quick-actions">
-      <button (click)="cambiarTab('productos')">Ir a productos</button>
-      <button (click)="cambiarTab('inventario')">Ir a inventario</button>
-      <button (click)="cambiarTab('ordenes')">Ir a ordenes</button>
-      <a routerLink="/admin/products/new">Nuevo producto</a>
-    </div>
+      <article class="summary-card">
+        <small>ORDENES</small>
+        <strong>{{ cantidadOrdenes }}</strong>
+        <span>Registradas en el sistema</span>
+      </article>
 
-    <div class="report-columns">
-      <section>
-        <h2>Ordenes recientes</h2>
+      <article class="summary-card">
+  <small>CLIENTES</small>
+  <strong>{{ clientesRegistrados }}</strong>
+  <span>Clientes registrados</span>
+</article>
 
-        <div class="compact-list" *ngIf="ordenesRecientes.length > 0">
-          <article *ngFor="let orden of ordenesRecientes">
-            <div>
-              <strong>{{ orden.codigo || orden.id }}</strong>
-              <span>{{ orden.usuarioNombre || 'Sin nombre' }}</span>
-            </div>
-            <small>{{ orden.estado }} · S/ {{ orden.total.toFixed(2) }}</small>
-          </article>
+      <article class="summary-card">
+  <small>CATEGORIAS</small>
+  <strong>{{ categoriasActivas }}</strong>
+  <span>Categorias activas</span>
+</article>
+
+<article class="summary-card">
+  <small>CRECIMIENTO</small>
+  <strong>{{ crecimientoMensual }}%</strong>
+  <span>Comparado con el mes anterior</span>
+</article>
+    </section>
+
+    <section class="quick-actions">
+      <a routerLink="/admin/products/new">
+        <small>CATALOGO</small>
+        <strong>Agregar producto</strong>
+        <span>Registrar nuevo producto</span>
+      </a>
+
+      <a routerLink="/admin/products">
+        <small>PRODUCTOS</small>
+        <strong>Mantenimiento</strong>
+        <span>Editar, eliminar y gestionar stock</span>
+      </a>
+
+      <a routerLink="/admin/inventory">
+        <small>INVENTARIO</small>
+        <strong>Ver inventario</strong>
+        <span>Controlar stock y ubicacion</span>
+      </a>
+
+      <a routerLink="/admin/orders">
+        <small>ORDENES</small>
+        <strong>Ver ordenes</strong>
+        <span>Consultar ventas recientes</span>
+      </a>
+    </section>
+
+    <section class="charts-grid">
+      <article class="panel chart-panel">
+        <div class="panel-heading">
+          <div>
+            <small>VENTAS</small>
+            <h2>Ventas por mes</h2>
+          </div>
+        </div>
+        <div class="chart-box">
+          <canvas #ventasChart></canvas>
+        </div>
+      </article>
+
+      <article class="panel chart-panel">
+        <div class="panel-heading">
+          <div>
+            <small>CATEGORIAS</small>
+            <h2>Ventas por categoria</h2>
+          </div>
+        </div>
+        <div class="chart-box">
+          <canvas #categoriaChart></canvas>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-content">
+      <article class="panel">
+        <div class="panel-heading">
+          <div>
+            <small>ORDENES</small>
+            <h2>Ordenes recientes</h2>
+          </div>
         </div>
 
-        <p class="empty-report" *ngIf="ordenesRecientes.length === 0">
-          Aun no hay ordenes registradas.
-        </p>
-      </section>
+        <div class="table-list" *ngIf="ordenesRecientes.length > 0; else sinOrdenes">
+          <div class="table-row header">
+            <span>Orden</span>
+            <span>Fecha</span>
+            <span>Estado</span>
+            <span>Total</span>
+          </div>
 
-      <section>
-        <h2>Productos con stock bajo</h2>
+          <div class="table-row" *ngFor="let orden of ordenesRecientes">
+            <span>#{{ orden.id }}</span>
+            <span>{{ formatearFecha(orden.fecha) }}</span>
+            <span class="badge" [ngClass]="claseEstadoOrden(orden.estado)">{{ orden.estado }}</span>
+            <span>S/ {{ orden.total.toFixed(2) }}</span>
+          </div>
+        </div>
 
-        <div class="compact-list" *ngIf="productosStockBajo.length > 0">
-          <article *ngFor="let item of productosStockBajo">
+        <ng-template #sinOrdenes>
+          <p class="empty-text">Todavia no hay ordenes registradas.</p>
+        </ng-template>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading">
+          <div>
+            <small>INVENTARIO</small>
+            <h2>Productos con stock bajo</h2>
+          </div>
+        </div>
+
+        <div class="stock-list" *ngIf="productosStockBajo.length > 0; else sinStockBajo">
+          <div class="stock-item" *ngFor="let item of productosStockBajo">
             <div>
-              <strong>{{ item.productName || item.productId }}</strong>
+              <strong>{{ nombreProducto(item.productId) }}</strong>
               <span>{{ item.ubicacion }}</span>
             </div>
-            <small>Stock: {{ item.stockActual }}</small>
-          </article>
+
+            <p>
+              <b>{{ item.stockActual }}</b>
+              <small>/ minimo {{ item.stockMinimo }}</small>
+            </p>
+          </div>
         </div>
 
-        <p class="empty-report" *ngIf="productosStockBajo.length === 0">
-          No hay productos con stock bajo.
-        </p>
-      </section>
-    </div>
-  </section>
-
-  <section *ngIf="tab === 'productos'" class="admin-section">
-    <div class="admin-toolbar">
-      <input
-        type="search"
-        placeholder="Buscar por nombre, codigo o categoria"
-        [(ngModel)]="busqueda"
-        (input)="aplicarFiltrosProductos()"
-      />
-
-      <select [(ngModel)]="categoriaActiva" (change)="aplicarFiltrosProductos()">
-        <option *ngFor="let categoria of categorias" [value]="categoria">
-          {{ categoria }}
-        </option>
-      </select>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-        <tr>
-          <th>Codigo</th>
-          <th>Producto</th>
-          <th>Categoria</th>
-          <th>Precio</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr *ngFor="let producto of productosFiltrados">
-          <td>{{ producto.codigo }}</td>
-          <td>{{ producto.nombre }}</td>
-          <td>{{ producto.categoria }}</td>
-          <td>S/ {{ producto.precio.toFixed(2) }}</td>
-          <td>{{ producto.estado }}</td>
-          <td class="actions">
-            <a [routerLink]="['/admin/products', producto.id, 'edit']">Editar</a>
-            <button (click)="eliminarProducto(producto)">Eliminar</button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section *ngIf="tab === 'inventario'" class="admin-section">
-    <div class="admin-toolbar">
-      <input
-        type="search"
-        placeholder="Buscar por producto, ubicacion o ID"
-        [(ngModel)]="busquedaInventario"
-        (input)="aplicarFiltrosInventario()"
-      />
-
-      <select [(ngModel)]="filtroStock" (change)="aplicarFiltrosInventario()">
-        <option value="Todos">Todos</option>
-        <option value="Bajo">Stock bajo</option>
-        <option value="SinStock">Sin stock</option>
-        <option value="Disponible">Disponible</option>
-      </select>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Stock</th>
-          <th>Minimo</th>
-          <th>Estado</th>
-          <th>Ubicacion</th>
-          <th>Acciones</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr *ngFor="let item of inventarioFiltrado" [class.low-stock]="item.stockActual <= 5">
-          <td>{{ item.productName || item.productId }}</td>
-          <td>{{ item.stockActual }}</td>
-          <td>{{ item.stockMinimo }}</td>
-          <td>{{ item.estado }}</td>
-          <td>{{ item.ubicacion }}</td>
-          <td class="actions">
-            <button (click)="agregarStock(item)">Agregar</button>
-            <button (click)="restarStock(item)">Restar</button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section *ngIf="tab === 'ordenes'" class="admin-section">
-    <div class="admin-toolbar">
-      <input
-        type="search"
-        placeholder="Buscar por codigo, cliente o correo"
-        [(ngModel)]="busquedaOrdenes"
-        (input)="aplicarFiltrosOrdenes()"
-      />
-
-      <select [(ngModel)]="filtroEstadoOrden" (change)="aplicarFiltrosOrdenes()">
-        <option *ngFor="let estado of estadosOrden" [value]="estado">
-          {{ estado }}
-        </option>
-      </select>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-        <tr>
-          <th>Codigo</th>
-          <th>Fecha</th>
-          <th>Cliente</th>
-          <th>Correo</th>
-          <th>Total</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <ng-container *ngFor="let orden of ordenesFiltradas">
-          <tr>
-            <td>{{ orden.codigo || orden.id }}</td>
-            <td>{{ orden.fecha | date:'short' }}</td>
-            <td>{{ orden.usuarioNombre || 'Sin nombre' }}</td>
-            <td>{{ orden.usuarioEmail || 'Sin correo' }}</td>
-            <td>S/ {{ orden.total.toFixed(2) }}</td>
-            <td>{{ orden.estado }}</td>
-            <td class="actions">
-              <button (click)="verDetalleOrden(orden)">Detalles</button>
-              <button
-                [disabled]="orden.estado === 'CANCELADA'"
-                (click)="cancelarOrden(orden)"
-              >
-                Cancelar
-              </button>
-            </td>
-          </tr>
-
-          <tr class="detail-row" *ngIf="detalleOrdenId === orden.id">
-            <td colspan="7">
-              <div class="order-detail">
-                <strong>Detalle de productos</strong>
-
-                <p *ngFor="let detalle of orden.detalles">
-                  {{ detalle.productName }} x {{ detalle.cantidad }}
-                  - S/ {{ detalle.subtotal.toFixed(2) }}
-                </p>
-
-                <strong>Pago</strong>
-
-                <p *ngIf="pagoDe(orden.id) as pago">
-                  {{ pago.estado }} - {{ pago.nombreCompleto }} -
-                  {{ pago.correoElectronico }} - S/ {{ pago.monto.toFixed(2) }}
-                </p>
-
-                <p *ngIf="pagoDe(orden.id) === null">
-                  No hay pago registrado para esta orden.
-                </p>
-              </div>
-            </td>
-          </tr>
-        </ng-container>
-        </tbody>
-      </table>
-    </div>
-  </section>
+        <ng-template #sinStockBajo>
+          <p class="empty-text">No hay productos con stock bajo.</p>
+        </ng-template>
+      </article>
+    </section>
+  </ng-container>
 </main>
