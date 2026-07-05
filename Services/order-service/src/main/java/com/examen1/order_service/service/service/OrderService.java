@@ -12,6 +12,9 @@ public interface OrderService {
 
     List<OrderResponse> getAll();
 
+    List<OrderResponse> getByUsuarioId(Long usuarioId);
+
     OrderResponse getById(Long id);
+
     void updateStatus(Long id, OrderStatus status);
 }

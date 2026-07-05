@@ -15,6 +15,6 @@ export class App {
   constructor(private router: Router) {}
 
   protected get showNavbar(): boolean {
-    return this.router.url !== '/' && !this.router.url.startsWith('/login');
+    return !this.router.url.startsWith('/login') && !this.router.url.startsWith('/register');
   }
 }

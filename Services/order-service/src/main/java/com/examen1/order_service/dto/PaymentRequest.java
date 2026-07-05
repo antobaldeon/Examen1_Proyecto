@@ -6,7 +6,6 @@ import lombok.Data;
 public class PaymentRequest {
 
     private Long orderId;
-    private Double monto;
     private String nombreCompleto;
     private String numeroTarjeta;
     private String fechaExpiracion;

@@ -1,6 +1,5 @@
 package com.examen1.order_service.mapper;
 
-
 import com.examen1.order_service.dto.OrderResponse;
 import com.examen1.order_service.model.Order;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +13,15 @@ public class OrderMapper {
 
     public OrderResponse toResponse(Order order) {
         OrderResponse response = new OrderResponse();
+
         response.setId(order.getId());
+        response.setCodigo(order.getCodigo());
         response.setTipo(order.getTipo());
         response.setFecha(order.getFecha());
         response.setEstado(order.getEstado());
+        response.setUsuarioId(order.getUsuarioId());
+        response.setUsuarioNombre(order.getUsuarioNombre());
+        response.setUsuarioEmail(order.getUsuarioEmail());
         response.setSubtotal(order.getSubtotal());
         response.setIgv(order.getIgv());
         response.setTotal(order.getTotal());

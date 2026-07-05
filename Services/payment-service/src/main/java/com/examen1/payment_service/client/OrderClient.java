@@ -1,13 +1,15 @@
 package com.examen1.payment_service.client;
 
+import com.examen1.payment_service.dto.OrderResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "order-service", contextId = "orderServiceClient")
+@FeignClient(name = "order-service", path = "/api/v1/orders")
 public interface OrderClient {
 
-    @PutMapping("/api/v1/orders/{id}/status")
+    @GetMapping("/{id}")
+    OrderResponse findById(@PathVariable("id") Long id);
+
+    @PutMapping("/{id}/status")
     void updateStatus(@PathVariable("id") Long id, @RequestParam("status") String status);
 }

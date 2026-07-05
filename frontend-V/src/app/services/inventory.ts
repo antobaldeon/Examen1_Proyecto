@@ -18,14 +18,26 @@ export class InventoryService {
     return this.http.get<Inventory[]>(this.baseUrl);
   }
 
-  create(inventory: InventoryRequest): Observable<void> {
-    return this.http.post<void>(this.baseUrl, inventory);
+  create(inventory: InventoryRequest): Observable<Inventory> {
+    return this.http.post<Inventory>(this.baseUrl, inventory);
+  }
+
+  update(id: number, inventory: InventoryRequest): Observable<Inventory> {
+    return this.http.put<Inventory>(`${this.baseUrl}/${id}`, inventory);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  updateStock(productId: number, cantidad: number, tipo: 'ENTRADA' | 'SALIDA'): Observable<Inventory> {
+    return this.http.put<Inventory>(`${this.baseUrl}/product/${productId}/stock`, {
+      cantidad,
+      tipo
+    });
   }
 
   addStock(productId: number, cantidad: number): Observable<Inventory> {
-    return this.http.put<Inventory>(`${this.baseUrl}/product/${productId}/stock`, {
-      cantidad,
-      tipo: 'ENTRADA'
-    });
+    return this.updateStock(productId, cantidad, 'ENTRADA');
   }
 }

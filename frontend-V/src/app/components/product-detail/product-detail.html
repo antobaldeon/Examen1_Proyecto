@@ -1,0 +1,51 @@
+<main class="detail-page">
+  <a class="back-link" routerLink="/products">Volver al catalogo</a>
+
+  <section class="status-card" *ngIf="cargando">
+    <p>Cargando producto...</p>
+  </section>
+
+  <section class="status-card error" *ngIf="error">
+    <p>{{ error }}</p>
+  </section>
+
+  <section class="detail-shell" [class.unavailable]="!disponible" *ngIf="!cargando && !error && producto">
+    <div class="detail-visual" [class.has-image]="producto.imagenUrl">
+      <img *ngIf="producto.imagenUrl" [src]="producto.imagenUrl" [alt]="producto.nombre" />
+      <strong *ngIf="!producto.imagenUrl">{{ producto.nombre.charAt(0) }}</strong>
+    </div>
+
+    <article class="detail-content">
+      <span class="eyebrow">{{ producto.categoria }}</span>
+      <h1>{{ producto.nombre }}</h1>
+      <p>{{ producto.descripcion }}</p>
+
+      <div class="product-meta">
+        <span>Codigo: <strong>{{ producto.codigo }}</strong></span>
+        <span>Estado: <strong>{{ disponible ? producto.estado : 'NO DISPONIBLE' }}</strong></span>
+        <span>Stock: <strong>{{ stockDisponible }}</strong></span>
+      </div>
+
+      <div class="price-box">
+        <small>Precio</small>
+        <strong>S/ {{ producto.precio.toFixed(2) }}</strong>
+      </div>
+
+      <div class="detail-actions">
+        <div class="quantity-box">
+          <span>Cantidad</span>
+          <div class="quantity-control">
+            <button type="button" [disabled]="!disponible || cantidad <= 1" (click)="cambiarCantidad(cantidad - 1)">-</button>
+            <strong>{{ cantidad }}</strong>
+            <button type="button" [disabled]="!disponible || cantidad >= stockDisponible" (click)="cambiarCantidad(cantidad + 1)">+</button>
+          </div>
+        </div>
+        <button type="button" [disabled]="!disponible" (click)="agregarAlCarrito()">
+          {{ disponible ? 'Agregar al carrito' : 'Sin stock' }}
+        </button>
+      </div>
+
+      <p class="detail-message" *ngIf="mensaje">{{ mensaje }}</p>
+    </article>
+  </section>
+</main>

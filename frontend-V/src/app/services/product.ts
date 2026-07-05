@@ -14,6 +14,10 @@ export class ProductService {
     return this.http.get<Product[]>(this.baseUrl);
   }
 
+  getById(id: number): Observable<Product> {
+    return this.http.get<Product>(`${this.baseUrl}/${id}`);
+  }
+
   create(product: ProductRequest): Observable<number> {
     return this.http.post(this.baseUrl, product, { observe: 'response' }).pipe(
       map((response) => {
@@ -25,6 +29,10 @@ export class ProductService {
         return productId;
       })
     );
+  }
+
+  update(id: number, product: ProductRequest): Observable<Product> {
+    return this.http.put<Product>(`${this.baseUrl}/${id}`, product);
   }
 
   delete(id: number): Observable<void> {

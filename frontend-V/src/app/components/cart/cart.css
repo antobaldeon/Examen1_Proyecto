@@ -89,6 +89,10 @@
 
 .cart-item:last-child { border-bottom: 0; }
 
+.cart-item.stock-alert {
+  background: #f4f4f4;
+}
+
 .item-visual {
   min-height: 100px;
   display: grid;
@@ -133,6 +137,17 @@
   line-height: 1.4;
 }
 
+.stock-copy {
+  display: block;
+  margin-top: 0.45rem;
+  color: #287a39;
+  font-size: 0.72rem;
+}
+
+.stock-copy.danger {
+  color: #97232b;
+}
+
 .item-copy button {
   margin-top: 0.55rem;
   border: 0;
@@ -158,6 +173,11 @@
   border: 0;
   background: #f4f4f4;
   cursor: pointer;
+}
+
+.quantity-control button:disabled {
+  color: #aaa;
+  cursor: not-allowed;
 }
 
 .quantity-control span {

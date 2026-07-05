@@ -28,4 +28,16 @@ export class OrderService {
   getById(id: number): Observable<OrderResponse> {
     return this.http.get<OrderResponse>(`${this.baseUrl}/${id}`);
   }
+
+  getAll(): Observable<OrderResponse[]> {
+    return this.http.get<OrderResponse[]>(this.baseUrl);
+  }
+
+  getByUsuarioId(usuarioId: number): Observable<OrderResponse[]> {
+    return this.http.get<OrderResponse[]>(`${this.baseUrl}/user/${usuarioId}`);
+  }
+
+  cancelar(id: number): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${id}/status?status=CANCELADA`, null);
+  }
 }

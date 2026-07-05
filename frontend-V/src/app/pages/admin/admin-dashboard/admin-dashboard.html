@@ -1,35 +1,183 @@
 <main class="admin-page">
   <header class="admin-heading">
     <div>
-      <span>ADMINISTRACIÓN</span>
+      <span>ADMINISTRACION</span>
       <h1>Panel de control</h1>
-      <p>Gestiona el catálogo y las próximas herramientas de la tienda desde un solo lugar.</p>
+      <p>Resumen general de productos, ventas, pagos, inventario y ordenes recientes.</p>
+      <small>{{ fechaFormateada }}</small>
     </div>
+
     <a routerLink="/products">Volver a la tienda</a>
   </header>
 
-  <section class="admin-grid">
-    <a class="admin-option primary" routerLink="/admin/products/new">
-      <div class="option-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm9.2 5.2-2-.7a7.8 7.8 0 0 0 0-1.4l2-.7-1.5-3.5-1.9.9c-.3-.4-.7-.7-1-1l.9-1.9-3.5-1.5-.7 2a7.8 7.8 0 0 0-1.4 0l-.7-2-3.5 1.5.9 1.9c-.4.3-.7.7-1 1l-1.9-.9-1.5 3.5 2 .7a7.8 7.8 0 0 0 0 1.4l-2 .7 1.5 3.5 1.9-.9c.3.4.7.7 1 1l-.9 1.9 3.5 1.5.7-2a7.8 7.8 0 0 0 1.4 0l.7 2 3.5-1.5-.9-1.9c.4-.3.7-.7 1-1l1.9.9 1.5-3.5Z"/>
-        </svg>
-      </div>
-      <div>
-        <small>CATÁLOGO</small>
-        <h2>Agregar producto</h2>
-        <p>Registra datos, imagen, precio y stock inicial.</p>
-      </div>
-      <span class="option-arrow">→</span>
-    </a>
-
-    <article class="admin-option coming-soon">
-      <div class="placeholder-icon">+</div>
-      <div>
-        <small>PRÓXIMAMENTE</small>
-        <h2>Nueva opción</h2>
-        <p>Este espacio queda preparado para futuras funciones administrativas.</p>
-      </div>
-    </article>
+  <section class="status-card" *ngIf="cargando">
+    <p>Cargando informacion del dashboard...</p>
   </section>
+
+  <section class="status-card error" *ngIf="error">
+    <p>{{ error }}</p>
+    <button (click)="cargarDashboard()">Reintentar</button>
+  </section>
+
+  <ng-container *ngIf="!cargando && !error">
+    <section class="summary-grid">
+      <article class="summary-card">
+        <small>PRODUCTOS</small>
+        <strong>{{ cantidadProductos }}</strong>
+        <span>Registrados en catalogo</span>
+      </article>
+
+      <article class="summary-card">
+        <small>VENTAS</small>
+        <strong>S/ {{ ventasTotales.toFixed(2) }}</strong>
+        <span>Total de ordenes pagadas</span>
+      </article>
+
+      <article class="summary-card">
+        <small>PAGOS</small>
+        <strong>{{ pagosRealizados }}</strong>
+        <span>Pagos realizados</span>
+      </article>
+
+      <article class="summary-card warning">
+        <small>STOCK BAJO</small>
+        <strong>{{ productosStockBajo.length }}</strong>
+        <span>Productos por revisar</span>
+      </article>
+
+      <article class="summary-card">
+        <small>ORDENES</small>
+        <strong>{{ cantidadOrdenes }}</strong>
+        <span>Registradas en el sistema</span>
+      </article>
+
+      <article class="summary-card">
+  <small>CLIENTES</small>
+  <strong>{{ clientesRegistrados }}</strong>
+  <span>Clientes registrados</span>
+</article>
+
+      <article class="summary-card">
+  <small>CATEGORIAS</small>
+  <strong>{{ categoriasActivas }}</strong>
+  <span>Categorias activas</span>
+</article>
+
+<article class="summary-card">
+  <small>CRECIMIENTO</small>
+  <strong>{{ crecimientoMensual }}%</strong>
+  <span>Comparado con el mes anterior</span>
+</article>
+    </section>
+
+    <section class="quick-actions">
+      <a routerLink="/admin/products/new">
+        <small>CATALOGO</small>
+        <strong>Agregar producto</strong>
+        <span>Registrar nuevo producto</span>
+      </a>
+
+      <a routerLink="/admin/products">
+        <small>PRODUCTOS</small>
+        <strong>Mantenimiento</strong>
+        <span>Editar, eliminar y gestionar stock</span>
+      </a>
+
+      <a routerLink="/admin/inventory">
+        <small>INVENTARIO</small>
+        <strong>Ver inventario</strong>
+        <span>Controlar stock y ubicacion</span>
+      </a>
+
+      <a routerLink="/admin/orders">
+        <small>ORDENES</small>
+        <strong>Ver ordenes</strong>
+        <span>Consultar ventas recientes</span>
+      </a>
+    </section>
+
+    <section class="charts-grid">
+      <article class="panel chart-panel">
+        <div class="panel-heading">
+          <div>
+            <small>VENTAS</small>
+            <h2>Ventas por mes</h2>
+          </div>
+        </div>
+        <div class="chart-box">
+          <canvas #ventasChart></canvas>
+        </div>
+      </article>
+
+      <article class="panel chart-panel">
+        <div class="panel-heading">
+          <div>
+            <small>CATEGORIAS</small>
+            <h2>Ventas por categoria</h2>
+          </div>
+        </div>
+        <div class="chart-box">
+          <canvas #categoriaChart></canvas>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-content">
+      <article class="panel">
+        <div class="panel-heading">
+          <div>
+            <small>ORDENES</small>
+            <h2>Ordenes recientes</h2>
+          </div>
+        </div>
+
+        <div class="table-list" *ngIf="ordenesRecientes.length > 0; else sinOrdenes">
+          <div class="table-row header">
+            <span>Orden</span>
+            <span>Fecha</span>
+            <span>Estado</span>
+            <span>Total</span>
+          </div>
+
+          <div class="table-row" *ngFor="let orden of ordenesRecientes">
+            <span>#{{ orden.id }}</span>
+            <span>{{ formatearFecha(orden.fecha) }}</span>
+            <span class="badge" [ngClass]="claseEstadoOrden(orden.estado)">{{ orden.estado }}</span>
+            <span>S/ {{ orden.total.toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <ng-template #sinOrdenes>
+          <p class="empty-text">Todavia no hay ordenes registradas.</p>
+        </ng-template>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading">
+          <div>
+            <small>INVENTARIO</small>
+            <h2>Productos con stock bajo</h2>
+          </div>
+        </div>
+
+        <div class="stock-list" *ngIf="productosStockBajo.length > 0; else sinStockBajo">
+          <div class="stock-item" *ngFor="let item of productosStockBajo">
+            <div>
+              <strong>{{ nombreProducto(item.productId) }}</strong>
+              <span>{{ item.ubicacion }}</span>
+            </div>
+
+            <p>
+              <b>{{ item.stockActual }}</b>
+              <small>/ minimo {{ item.stockMinimo }}</small>
+            </p>
+          </div>
+        </div>
+
+        <ng-template #sinStockBajo>
+          <p class="empty-text">No hay productos con stock bajo.</p>
+        </ng-template>
+      </article>
+    </section>
+  </ng-container>
 </main>

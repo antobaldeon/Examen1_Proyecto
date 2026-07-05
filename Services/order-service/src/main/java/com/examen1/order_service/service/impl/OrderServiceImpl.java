@@ -5,7 +5,12 @@ import com.examen1.order_service.dto.OrderRequest;
 import com.examen1.order_service.dto.OrderResponse;
 import com.examen1.order_service.dto.StockUpdateRequest;
 import com.examen1.order_service.mapper.OrderMapper;
-import com.examen1.order_service.model.*;
+import com.examen1.order_service.model.Inventory;
+import com.examen1.order_service.model.Order;
+import com.examen1.order_service.model.OrderDetail;
+import com.examen1.order_service.model.OrderStatus;
+import com.examen1.order_service.model.OrderType;
+import com.examen1.order_service.model.Product;
 import com.examen1.order_service.repository.OrderRepository;
 import com.examen1.order_service.service.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -22,33 +27,46 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
+    private static final String ORDER_CODE_PREFIX = "ORD-";
+
     private final OrderRepository repository;
     private final OrderMapper mapper;
     private final ProductLookupService productLookupService;
     private final InventoryLookupService inventoryLookupService;
 
     @Override
-    @Transactional // Evita inconsistencias si la actualización de stock o el guardado de la orden fallan
+    @Transactional
     public OrderResponse create(OrderRequest request) {
+        if (request.getDetalles() == null || request.getDetalles().isEmpty()) {
+            throw new RuntimeException("La orden debe tener al menos un producto.");
+        }
+
         Order order = new Order();
+
+        order.setCodigo(generateNextCode());
         order.setTipo(request.getTipo());
         order.setFecha(LocalDateTime.now());
         order.setEstado(OrderStatus.PENDIENTE);
+        order.setUsuarioId(request.getUsuarioId());
+        order.setUsuarioNombre(request.getUsuarioNombre());
+        order.setUsuarioEmail(request.getUsuarioEmail());
 
         List<OrderDetail> detalles = new ArrayList<>();
-        // Guardamos los nombres de los productos aquí para no volver a llamarlos por HTTP al final
         Map<Long, String> productNamesMap = new HashMap<>();
 
         for (var detailRequest : request.getDetalles()) {
             Product product = productLookupService.getProductById(detailRequest.getProductId());
-            // Almacenamos el nombre en memoria local
             productNamesMap.put(detailRequest.getProductId(), product.getNombre());
 
             if (request.getTipo() == OrderType.SALIDA) {
-                Inventory inventory = inventoryLookupService.getInventoryByProductId(detailRequest.getProductId());
+                Inventory inventory = inventoryLookupService.getInventoryByProductId(
+                        detailRequest.getProductId()
+                );
 
                 if (inventory.getStockActual() < detailRequest.getCantidad()) {
-                    throw new RuntimeException("Insufficient stock for product: " + product.getNombre());
+                    throw new RuntimeException(
+                            "Stock insuficiente para el producto: " + product.getNombre()
+                    );
                 }
             }
 
@@ -58,25 +76,21 @@ public class OrderServiceImpl implements OrderService {
             detail.setCantidad(detailRequest.getCantidad());
             detail.setPrecioUnitario(product.getPrecio());
 
-            double subtotalDetalle = roundTwoDecimals(detailRequest.getCantidad() * product.getPrecio());
+            double subtotalDetalle = roundTwoDecimals(
+                    detailRequest.getCantidad() * product.getPrecio()
+            );
+
             detail.setSubtotal(subtotalDetalle);
-
             detalles.add(detail);
-
-            // 🚀 RECONEXIÓN DEL STOCK: Descomentado y activado
-            StockUpdateRequest stockRequest = new StockUpdateRequest();
-            stockRequest.setCantidad(detailRequest.getCantidad());
-            stockRequest.setTipo(request.getTipo().name()); // Pasará "SALIDA" o "ENTRADA"
-
-            // Envía la petición HTTP a través de tu servicio proxy/client hacia el ms-inventory
-            inventoryLookupService.updateInventoryStock(detailRequest.getProductId(), stockRequest);
         }
 
         order.setDetalles(detalles);
 
-        double subtotalGlobal = roundTwoDecimals(detalles.stream()
-                .mapToDouble(OrderDetail::getSubtotal)
-                .sum());
+        double subtotalGlobal = roundTwoDecimals(
+                detalles.stream()
+                        .mapToDouble(OrderDetail::getSubtotal)
+                        .sum()
+        );
 
         double igvGlobal = roundTwoDecimals(subtotalGlobal * 0.18);
         double totalGlobal = roundTwoDecimals(subtotalGlobal + igvGlobal);
@@ -84,13 +98,11 @@ public class OrderServiceImpl implements OrderService {
         order.setSubtotal(subtotalGlobal);
         order.setIgv(igvGlobal);
         order.setTotal(totalGlobal);
-        order.setEstado(OrderStatus.COMPLETADA);
 
         order = repository.save(order);
 
         OrderResponse response = mapper.toResponse(order);
 
-        // 🚀 OPTIMIZACIÓN CLAVE: Mapeamos los nombres desde memoria (0 peticiones HTTP extras)
         if (response.getDetalles() != null) {
             for (OrderDetailResponse detailResponse : response.getDetalles()) {
                 String name = productNamesMap.get(detailResponse.getProductId());
@@ -105,26 +117,94 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderResponse> getAll() {
         return repository.findAll()
                 .stream()
-                .map(order -> {
-                    OrderResponse response = mapper.toResponse(order);
+                .map(this::toResponseWithProducts)
+                .toList();
+    }
 
-                    if (response.getDetalles() != null) {
-                        for (OrderDetailResponse detailResponse : response.getDetalles()) {
-                            Product product = productLookupService.getProductById(detailResponse.getProductId());
-                            detailResponse.setProductName(product.getNombre());
-                        }
-                    }
-
-                    return response;
-                })
+    @Override
+    public List<OrderResponse> getByUsuarioId(Long usuarioId) {
+        return repository.findByUsuarioIdOrderByFechaDesc(usuarioId)
+                .stream()
+                .map(this::toResponseWithProducts)
                 .toList();
     }
 
     @Override
     public OrderResponse getById(Long id) {
         Order order = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada."));
 
+        return toResponseWithProducts(order);
+    }
+
+    @Override
+    @Transactional
+    public void updateStatus(Long id, OrderStatus status) {
+        Order order = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada."));
+
+        if (order.getEstado() == OrderStatus.CANCELADA) {
+            throw new RuntimeException("No se puede actualizar una orden cancelada.");
+        }
+
+        OrderStatus estadoActual = order.getEstado();
+
+        if (status == OrderStatus.PAGADA && estadoActual != OrderStatus.PAGADA) {
+            descontarStockDeOrden(order);
+        }
+
+        if (status == OrderStatus.CANCELADA && stockFueDescontado(estadoActual)) {
+            restaurarStockDeOrden(order);
+        }
+
+        order.setEstado(status);
+        repository.save(order);
+    }
+
+    private boolean stockFueDescontado(OrderStatus estado) {
+        return estado == OrderStatus.PAGADA || estado == OrderStatus.COMPLETADA;
+    }
+
+    private void descontarStockDeOrden(Order order) {
+        if (order.getTipo() != OrderType.SALIDA) {
+            return;
+        }
+
+        for (OrderDetail detail : order.getDetalles()) {
+            Inventory inventory = inventoryLookupService.getInventoryByProductId(detail.getProductId());
+
+            if (inventory.getStockActual() < detail.getCantidad()) {
+                Product product = productLookupService.getProductById(detail.getProductId());
+                throw new RuntimeException(
+                        "Stock insuficiente para confirmar el pago del producto: " + product.getNombre()
+                );
+            }
+        }
+
+        for (OrderDetail detail : order.getDetalles()) {
+            StockUpdateRequest stockRequest = new StockUpdateRequest();
+            stockRequest.setCantidad(detail.getCantidad());
+            stockRequest.setTipo("SALIDA");
+
+            inventoryLookupService.updateInventoryStock(detail.getProductId(), stockRequest);
+        }
+    }
+
+    private void restaurarStockDeOrden(Order order) {
+        if (order.getTipo() != OrderType.SALIDA) {
+            return;
+        }
+
+        for (OrderDetail detail : order.getDetalles()) {
+            StockUpdateRequest stockRequest = new StockUpdateRequest();
+            stockRequest.setCantidad(detail.getCantidad());
+            stockRequest.setTipo("ENTRADA");
+
+            inventoryLookupService.updateInventoryStock(detail.getProductId(), stockRequest);
+        }
+    }
+
+    private OrderResponse toResponseWithProducts(Order order) {
         OrderResponse response = mapper.toResponse(order);
 
         if (response.getDetalles() != null) {
@@ -137,16 +217,23 @@ public class OrderServiceImpl implements OrderService {
         return response;
     }
 
-    private double roundTwoDecimals(double value) {
-        return Math.round(value * 100.0) / 100.0;
+    private String generateNextCode() {
+        return repository.findTopByCodigoStartingWithOrderByIdDesc(ORDER_CODE_PREFIX)
+                .map(Order::getCodigo)
+                .map(this::nextCodeFrom)
+                .orElse(ORDER_CODE_PREFIX + "0001");
     }
 
-    @Override
-    @Transactional
-    public void updateStatus(Long id, OrderStatus status) {
-        Order order = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-        order.setEstado(status);
-        repository.save(order);
+    private String nextCodeFrom(String currentCode) {
+        try {
+            int currentNumber = Integer.parseInt(currentCode.replace(ORDER_CODE_PREFIX, ""));
+            return ORDER_CODE_PREFIX + String.format("%04d", currentNumber + 1);
+        } catch (NumberFormatException ex) {
+            return ORDER_CODE_PREFIX + String.format("%04d", repository.count() + 1);
+        }
+    }
+
+    private double roundTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 }

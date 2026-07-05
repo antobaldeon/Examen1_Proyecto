@@ -22,7 +22,7 @@
         <span>Los precios incluyen el cálculo de IGV al confirmar.</span>
       </div>
 
-      <article class="cart-item" *ngFor="let item of items">
+      <article class="cart-item" [class.stock-alert]="sinStock(item) || superaStock(item)" *ngFor="let item of items">
         <div class="item-visual" [class.has-image]="item.product.imagenUrl">
           <img *ngIf="item.product.imagenUrl" [src]="item.product.imagenUrl" [alt]="item.product.nombre" />
           <span *ngIf="!item.product.imagenUrl">{{ identificadorVisual(item.product.nombre) }}</span>
@@ -31,15 +31,20 @@
           <small>{{ item.product.categoria }} · {{ item.product.codigo }}</small>
           <h2>{{ item.product.nombre }}</h2>
           <p>{{ item.product.descripcion }}</p>
+          <strong class="stock-copy" [class.danger]="sinStock(item) || superaStock(item)">
+            Stock: {{ stockDe(item.product.id) ?? '—' }}
+          </strong>
           <button (click)="quitarProducto(item.product.id)">Quitar</button>
         </div>
         <div class="quantity-control">
           <button
             aria-label="Reducir cantidad"
+            [disabled]="item.cantidad <= 1"
             (click)="cambiarCantidad(item.product.id, item.cantidad - 1)">−</button>
           <span>{{ item.cantidad }}</span>
           <button
             aria-label="Aumentar cantidad"
+            [disabled]="sinStock(item) || item.cantidad >= (stockDe(item.product.id) ?? item.cantidad)"
             (click)="cambiarCantidad(item.product.id, item.cantidad + 1)">+</button>
         </div>
         <div class="item-price">
@@ -75,7 +80,7 @@
 
       <p class="order-error" *ngIf="errorOrden">{{ errorOrden }}</p>
 
-      <button class="checkout-button" [disabled]="creandoOrden" (click)="realizarPago()">
+      <button class="checkout-button" [disabled]="creandoOrden || !puedePagar()" (click)="realizarPago()">
         {{ creandoOrden ? 'Preparando pedido...' : 'Continuar al pago' }}
       </button>
       <small class="secure-copy">Pago procesado mediante una sesión protegida.</small>

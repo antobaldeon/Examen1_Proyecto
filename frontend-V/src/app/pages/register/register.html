@@ -1,0 +1,91 @@
+<main class="login-wrapper">
+  <section class="login-panel-left">
+    <div class="brand" aria-label="ITMAC Future">
+      <img src="/itmac-logo.svg" alt="ITMAC Future" />
+    </div>
+
+    <p class="login-title">REGISTRO</p>
+    <p class="login-subtitle">Crea tu cuenta de cliente</p>
+
+    <div class="login-error" *ngIf="errorMessage" role="alert">
+      {{ errorMessage }}
+    </div>
+
+    <div class="login-success" *ngIf="successMessage" role="status">
+      {{ successMessage }}
+    </div>
+
+    <form (ngSubmit)="register()" class="login-form">
+      <label class="itmac-input-group">
+        <span class="input-icon">N</span>
+        <input
+          class="itmac-input"
+          type="text"
+          name="nombre"
+          [(ngModel)]="request.nombre"
+          placeholder="Nombre completo"
+          autocomplete="name"
+          required
+        />
+      </label>
+
+      <label class="itmac-input-group">
+        <span class="input-icon">@</span>
+        <input
+          class="itmac-input"
+          type="email"
+          name="email"
+          [(ngModel)]="request.email"
+          placeholder="Correo electronico"
+          autocomplete="email"
+          required
+        />
+      </label>
+
+      <label class="itmac-input-group">
+        <span class="input-icon">*</span>
+        <input
+          class="itmac-input"
+          type="password"
+          name="password"
+          [(ngModel)]="request.password"
+          placeholder="Contrasena"
+          autocomplete="new-password"
+          required
+        />
+      </label>
+
+      <label class="itmac-input-group">
+        <span class="input-icon">*</span>
+        <input
+          class="itmac-input"
+          type="password"
+          name="confirmarPassword"
+          [(ngModel)]="confirmarPassword"
+          placeholder="Confirmar contrasena"
+          autocomplete="new-password"
+          required
+        />
+      </label>
+
+      <button type="submit" class="btn-itmac" [disabled]="enviando">
+        {{ enviando ? 'Creando cuenta...' : 'Registrarme' }}
+      </button>
+    </form>
+
+    <p class="login-register">
+      ¿Ya tienes cuenta?
+      <a routerLink="/login">Inicia sesion</a>
+    </p>
+  </section>
+
+  <section class="login-panel-right" aria-hidden="true">
+    <div class="login-promo-card">
+      <p class="login-promo-text">Compra<br />rapido y<br />seguro.</p>
+      <div class="promo-mark">
+        <span>ITMAC</span>
+        <small>FUTURE</small>
+      </div>
+    </div>
+  </section>
+</main>

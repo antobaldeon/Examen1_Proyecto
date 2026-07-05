@@ -13,4 +13,8 @@ export class PaymentService {
   processPayment(payment: PaymentRequest): Observable<PaymentResponse> {
     return this.http.post<PaymentResponse>(this.baseUrl, payment);
   }
+
+  getByOrderId(orderId: number): Observable<PaymentResponse> {
+    return this.http.get<PaymentResponse>(`${this.baseUrl}/order/${orderId}`);
+  }
 }

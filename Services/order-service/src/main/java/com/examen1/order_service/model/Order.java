@@ -15,6 +15,9 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
+    private String codigo;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderType tipo;
@@ -25,6 +28,12 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus estado;
+
+    private Long usuarioId;
+
+    private String usuarioNombre;
+
+    private String usuarioEmail;
 
     @Column(nullable = false)
     private Double subtotal;
@@ -37,6 +46,4 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> detalles;
-
-
 }

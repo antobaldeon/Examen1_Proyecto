@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Inventory } from '../../models/inventory.model';
 import { Product } from '../../models/product.model';
 import { AuthService } from '../../services/auth';
@@ -29,10 +30,16 @@ export class ProductListComponent implements OnInit {
     private productService: ProductService,
     private inventoryService: InventoryService,
     private cartService: CartService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+    if (this.esAdmin) {
+      void this.router.navigate(['/admin']);
+      return;
+    }
+
     this.cargarProductos();
   }
 
@@ -52,7 +59,7 @@ export class ProductListComponent implements OnInit {
         this.productos = data;
         this.aplicarFiltros();
         this.cargando = false;
-        if (this.esAdmin) this.cargarInventario();
+        this.cargarInventario();
       },
       error: () => {
         this.error = 'No pudimos cargar el catálogo. Revisa que product-service esté disponible.';
@@ -88,7 +95,16 @@ export class ProductListComponent implements OnInit {
     this.aplicarFiltros();
   }
 
+  verDetalle(producto: Product): void {
+    void this.router.navigate(['/products', producto.id]);
+  }
+
   agregarAlCarrito(producto: Product): void {
+    if (!this.estaDisponible(producto)) {
+      this.mostrarMensaje(`${producto.nombre} no esta disponible.`);
+      return;
+    }
+
     this.cartService.addToCart(producto);
     this.mostrarMensaje(`${producto.nombre} se agregó al carrito.`);
   }
@@ -118,6 +134,11 @@ export class ProductListComponent implements OnInit {
 
   stockDe(productId: number): number | null {
     return this.inventario.get(productId)?.stockActual ?? null;
+  }
+
+  estaDisponible(producto: Product): boolean {
+    const stock = this.stockDe(producto.id);
+    return producto.estado === 'ACTIVO' && stock !== null && stock > 0;
   }
 
   identificadorVisual(producto: Product): string {

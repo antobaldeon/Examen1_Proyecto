@@ -74,7 +74,14 @@
     </div>
 
     <div class="product-grid" *ngIf="!cargando">
-      <article class="product-card" *ngFor="let producto of productosFiltrados">
+      <article
+        class="product-card"
+        [class.unavailable]="!estaDisponible(producto)"
+        *ngFor="let producto of productosFiltrados"
+        role="button"
+        tabindex="0"
+        (click)="verDetalle(producto)"
+        (keydown.enter)="verDetalle(producto)">
         <div class="product-visual" [class.has-image]="producto.imagenUrl">
           <span class="product-category">{{ producto.categoria }}</span>
           <img *ngIf="producto.imagenUrl" [src]="producto.imagenUrl" [alt]="producto.nombre" />
@@ -84,13 +91,15 @@
         <div class="product-content">
           <div class="product-title">
             <h3>{{ producto.nombre }}</h3>
-            <span [class.inactive]="producto.estado !== 'ACTIVO'">{{ producto.estado }}</span>
+            <span [class.inactive]="!estaDisponible(producto)">
+              {{ estaDisponible(producto) ? producto.estado : 'NO DISPONIBLE' }}
+            </span>
           </div>
           <p>{{ producto.descripcion }}</p>
 
-          <div class="admin-stock" *ngIf="esAdmin">
+          <div class="product-stock">
             <span>Stock: <strong>{{ stockDe(producto.id) ?? '—' }}</strong></span>
-            <button (click)="reponerStock(producto.id)">+1 unidad</button>
+            <button *ngIf="esAdmin" (click)="reponerStock(producto.id)">+1 unidad</button>
           </div>
 
           <div class="product-footer">
@@ -100,13 +109,13 @@
             </div>
             <button
               class="add-button"
-              [disabled]="producto.estado !== 'ACTIVO'"
-              (click)="agregarAlCarrito(producto)">
-              Agregar
+              [disabled]="!estaDisponible(producto)"
+              (click)="$event.stopPropagation(); agregarAlCarrito(producto)">
+              {{ estaDisponible(producto) ? 'Agregar' : 'Sin stock' }}
             </button>
           </div>
 
-          <button class="delete-button" *ngIf="esAdmin" (click)="eliminarProducto(producto)">
+          <button class="delete-button" *ngIf="esAdmin" (click)="$event.stopPropagation(); eliminarProducto(producto)">
             Eliminar producto
           </button>
         </div>
