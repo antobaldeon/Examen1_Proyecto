@@ -68,7 +68,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 && ("POST".equals(method) || "PUT".equals(method) || "DELETE".equals(method)))
                 || ("GET".equals(method) && "/api/v1/orders".equals(path))
                 || (path.startsWith("/api/v1/orders/") && "PUT".equals(method))
-                || (path.startsWith("/api/v1/payments/") && "GET".equals(method))
+                || (path.startsWith("/api/v1/payments/")
+                && "GET".equals(method)
+                && !path.startsWith("/api/v1/payments/order/"))
                 || (
                 path.startsWith("/api/v1/products")
                         && (

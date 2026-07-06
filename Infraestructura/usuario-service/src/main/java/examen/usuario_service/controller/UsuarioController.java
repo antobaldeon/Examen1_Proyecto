@@ -1,5 +1,6 @@
 package examen.usuario_service.controller;
 
+import examen.usuario_service.dto.PasswordUpdateRequest;
 import examen.usuario_service.dto.UsuarioRequest;
 import examen.usuario_service.dto.UsuarioResponse;
 import examen.usuario_service.service.UsuarioService;
@@ -20,6 +21,11 @@ public class UsuarioController {
         return usuarioService.register(request);
     }
 
+    @PostMapping("/admin")
+    public UsuarioResponse createAdmin(@RequestBody UsuarioRequest request) {
+        return usuarioService.createAdmin(request);
+    }
+
     @GetMapping("/email/{email}")
     public UsuarioResponse findByEmail(@PathVariable String email) {
         return usuarioService.findByEmail(email);
@@ -33,6 +39,16 @@ public class UsuarioController {
     @GetMapping
     public List<UsuarioResponse> findAll() {
         return usuarioService.findAll();
+    }
+
+    @PutMapping("/{id}")
+    public UsuarioResponse update(@PathVariable Long id, @RequestBody UsuarioRequest request) {
+        return usuarioService.update(id, request);
+    }
+
+    @PutMapping("/{id}/password")
+    public UsuarioResponse updatePassword(@PathVariable Long id, @RequestBody PasswordUpdateRequest request) {
+        return usuarioService.updatePassword(id, request.getPassword());
     }
 
 }

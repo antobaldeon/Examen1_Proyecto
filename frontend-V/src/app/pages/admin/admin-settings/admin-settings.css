@@ -1,0 +1,238 @@
+:host {
+  display: block;
+  min-height: calc(100vh - 76px);
+  color: var(--itmac-text, #222);
+}
+
+.settings-page {
+  max-width: 1240px;
+}
+
+.fw-black {
+  font-weight: 900;
+}
+
+.eyebrow {
+  color: var(--itmac-red, #e51d2a);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+
+.settings-header {
+  border-bottom: 1px solid var(--itmac-line, #e4e4df);
+  padding-bottom: 1.2rem;
+}
+
+.settings-header p {
+  max-width: 680px;
+}
+
+.settings-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.settings-sidebar {
+  position: sticky;
+  top: 96px;
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+  min-height: 340px;
+  border: 1px solid var(--itmac-line, #e4e4df);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.75rem;
+  box-shadow: var(--itmac-shadow-soft, 0 8px 24px rgb(20 20 20 / 6%));
+}
+
+.settings-sidebar button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #343434;
+  font-weight: 800;
+  padding: 0 0.9rem;
+  text-align: left;
+}
+
+.settings-sidebar i {
+  width: 22px;
+  color: var(--itmac-red, #e51d2a);
+  font-size: 1.08rem;
+}
+
+.settings-sidebar button:hover,
+.settings-sidebar button.active {
+  background: var(--itmac-red, #e51d2a);
+  color: #fff;
+  box-shadow: 0 10px 22px rgb(229 29 42 / 20%);
+}
+
+.settings-sidebar button:hover i,
+.settings-sidebar button.active i {
+  color: #fff;
+}
+
+.settings-panel {
+  min-height: 580px;
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.panel-title {
+  margin-bottom: 1.3rem;
+}
+
+.panel-title h2 {
+  margin: 0.25rem 0 0;
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+  font-weight: 900;
+}
+
+label {
+  display: grid;
+  gap: 0.45rem;
+  color: #303030;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.form-control,
+.form-select {
+  min-height: 48px;
+  border-color: #dedad4;
+  border-radius: 8px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--itmac-red, #e51d2a);
+  box-shadow: 0 0 0 0.22rem rgb(229 29 42 / 12%);
+}
+
+.form-control:disabled {
+  background: #f3f3ef;
+  color: #666;
+}
+
+.btn {
+  min-height: 42px;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.alert {
+  border-radius: 8px;
+  font-weight: 750;
+}
+
+.users-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.users-table {
+  overflow: hidden;
+  border: 1px solid var(--itmac-line, #e4e4df);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.table {
+  --bs-table-hover-bg: #fff7f7;
+}
+
+.table thead th {
+  border-bottom: 1px solid var(--itmac-line, #e4e4df);
+  background: #fafaf8;
+  color: var(--itmac-muted, #6f6f6f);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.table td,
+.table th {
+  padding: 0.9rem 1rem;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 0 0.55rem;
+}
+
+.role-badge.admin {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.edit-card {
+  border-color: var(--itmac-line, #e4e4df);
+}
+
+.edit-card .card-body {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.edit-card h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.empty-text {
+  margin: 0;
+  padding: 1rem;
+  color: var(--itmac-muted, #6f6f6f);
+}
+
+@media (max-width: 1020px) {
+  .settings-shell,
+  .users-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-sidebar {
+    position: static;
+    min-height: auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .settings-sidebar button {
+    justify-content: center;
+    padding: 0 0.6rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 720px) {
+  .settings-sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-sidebar button {
+    justify-content: flex-start;
+  }
+
+  .table {
+    min-width: 720px;
+  }
+}

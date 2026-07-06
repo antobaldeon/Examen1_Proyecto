@@ -1,183 +1,278 @@
-<main class="admin-page">
-  <header class="admin-heading">
+<main class="admin-page container-fluid py-4 py-lg-5">
+  <header class="admin-heading d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4 pb-3 border-bottom">
     <div>
-      <span>ADMINISTRACION</span>
-      <h1>Panel de control</h1>
-      <p>Resumen general de productos, ventas, pagos, inventario y ordenes recientes.</p>
-      <small>{{ fechaFormateada }}</small>
+      <span class="eyebrow d-block text-uppercase mb-1">ADMINISTRACIÓN</span>
+      <h1 class="display-5 fw-bold mb-2">Panel de control</h1>
+      <p class="text-secondary mb-1">Resumen general de productos, ventas, pagos, inventario y órdenes recientes.</p>
+      <small class="text-secondary">{{ fechaFormateada }}</small>
     </div>
 
-    <a routerLink="/products">Volver a la tienda</a>
+    
   </header>
 
-  <section class="status-card" *ngIf="cargando">
-    <p>Cargando informacion del dashboard...</p>
-  </section>
+  <div class="alert alert-light border d-flex align-items-center gap-2" *ngIf="cargando">
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    <span>Cargando información del dashboard...</span>
+  </div>
 
-  <section class="status-card error" *ngIf="error">
-    <p>{{ error }}</p>
-    <button (click)="cargarDashboard()">Reintentar</button>
-  </section>
+  <div class="alert alert-danger d-flex justify-content-between align-items-center gap-2" *ngIf="error">
+    <span>{{ error }}</span>
+    <button class="btn btn-sm btn-outline-danger" (click)="cargarDashboard()">Reintentar</button>
+  </div>
 
   <ng-container *ngIf="!cargando && !error">
-    <section class="summary-grid">
-      <article class="summary-card">
-        <small>PRODUCTOS</small>
-        <strong>{{ cantidadProductos }}</strong>
-        <span>Registrados en catalogo</span>
-      </article>
-
-      <article class="summary-card">
-        <small>VENTAS</small>
-        <strong>S/ {{ ventasTotales.toFixed(2) }}</strong>
-        <span>Total de ordenes pagadas</span>
-      </article>
-
-      <article class="summary-card">
-        <small>PAGOS</small>
-        <strong>{{ pagosRealizados }}</strong>
-        <span>Pagos realizados</span>
-      </article>
-
-      <article class="summary-card warning">
-        <small>STOCK BAJO</small>
-        <strong>{{ productosStockBajo.length }}</strong>
-        <span>Productos por revisar</span>
-      </article>
-
-      <article class="summary-card">
-        <small>ORDENES</small>
-        <strong>{{ cantidadOrdenes }}</strong>
-        <span>Registradas en el sistema</span>
-      </article>
-
-      <article class="summary-card">
-  <small>CLIENTES</small>
-  <strong>{{ clientesRegistrados }}</strong>
-  <span>Clientes registrados</span>
-</article>
-
-      <article class="summary-card">
-  <small>CATEGORIAS</small>
-  <strong>{{ categoriasActivas }}</strong>
-  <span>Categorias activas</span>
-</article>
-
-<article class="summary-card">
-  <small>CRECIMIENTO</small>
-  <strong>{{ crecimientoMensual }}%</strong>
-  <span>Comparado con el mes anterior</span>
-</article>
-    </section>
-
-    <section class="quick-actions">
-      <a routerLink="/admin/products/new">
-        <small>CATALOGO</small>
-        <strong>Agregar producto</strong>
-        <span>Registrar nuevo producto</span>
-      </a>
-
-      <a routerLink="/admin/products">
-        <small>PRODUCTOS</small>
-        <strong>Mantenimiento</strong>
-        <span>Editar, eliminar y gestionar stock</span>
-      </a>
-
-      <a routerLink="/admin/inventory">
-        <small>INVENTARIO</small>
-        <strong>Ver inventario</strong>
-        <span>Controlar stock y ubicacion</span>
-      </a>
-
-      <a routerLink="/admin/orders">
-        <small>ORDENES</small>
-        <strong>Ver ordenes</strong>
-        <span>Consultar ventas recientes</span>
-      </a>
-    </section>
-
-    <section class="charts-grid">
-      <article class="panel chart-panel">
-        <div class="panel-heading">
-          <div>
-            <small>VENTAS</small>
-            <h2>Ventas por mes</h2>
-          </div>
-        </div>
-        <div class="chart-box">
-          <canvas #ventasChart></canvas>
-        </div>
-      </article>
-
-      <article class="panel chart-panel">
-        <div class="panel-heading">
-          <div>
-            <small>CATEGORIAS</small>
-            <h2>Ventas por categoria</h2>
-          </div>
-        </div>
-        <div class="chart-box">
-          <canvas #categoriaChart></canvas>
-        </div>
-      </article>
-    </section>
-
-    <section class="dashboard-content">
-      <article class="panel">
-        <div class="panel-heading">
-          <div>
-            <small>ORDENES</small>
-            <h2>Ordenes recientes</h2>
-          </div>
-        </div>
-
-        <div class="table-list" *ngIf="ordenesRecientes.length > 0; else sinOrdenes">
-          <div class="table-row header">
-            <span>Orden</span>
-            <span>Fecha</span>
-            <span>Estado</span>
-            <span>Total</span>
-          </div>
-
-          <div class="table-row" *ngFor="let orden of ordenesRecientes">
-            <span>#{{ orden.id }}</span>
-            <span>{{ formatearFecha(orden.fecha) }}</span>
-            <span class="badge" [ngClass]="claseEstadoOrden(orden.estado)">{{ orden.estado }}</span>
-            <span>S/ {{ orden.total.toFixed(2) }}</span>
-          </div>
-        </div>
-
-        <ng-template #sinOrdenes>
-          <p class="empty-text">Todavia no hay ordenes registradas.</p>
-        </ng-template>
-      </article>
-
-      <article class="panel">
-        <div class="panel-heading">
-          <div>
-            <small>INVENTARIO</small>
-            <h2>Productos con stock bajo</h2>
-          </div>
-        </div>
-
-        <div class="stock-list" *ngIf="productosStockBajo.length > 0; else sinStockBajo">
-          <div class="stock-item" *ngFor="let item of productosStockBajo">
-            <div>
-              <strong>{{ nombreProducto(item.productId) }}</strong>
-              <span>{{ item.ubicacion }}</span>
+    <!-- Resumen -->
+    <section class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-4">
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="eyebrow text-uppercase">PRODUCTOS</span>
+              <i class="bi bi-box-seam text-primary fs-5"></i>
             </div>
-
-            <p>
-              <b>{{ item.stockActual }}</b>
-              <small>/ minimo {{ item.stockMinimo }}</small>
-            </p>
+            <strong class="d-block fs-3 fw-bold">{{ cantidadProductos }}</strong>
+            <span class="text-secondary small">Registrados en catálogo</span>
           </div>
         </div>
+      </div>
 
-        <ng-template #sinStockBajo>
-          <p class="empty-text">No hay productos con stock bajo.</p>
-        </ng-template>
-      </article>
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="eyebrow text-uppercase">VENTAS</span>
+              <i class="bi bi-currency-dollar text-primary fs-5"></i>
+            </div>
+            <strong class="d-block fs-3 fw-bold">S/ {{ ventasTotales.toFixed(2) }}</strong>
+            <span class="text-secondary small">Total de órdenes pagadas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="eyebrow text-uppercase">PAGOS</span>
+              <i class="bi bi-credit-card text-primary fs-5"></i>
+            </div>
+            <strong class="d-block fs-3 fw-bold">{{ pagosRealizados }}</strong>
+            <span class="text-secondary small">Pagos realizados</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 shadow-sm border-warning">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="eyebrow text-uppercase">STOCK BAJO</span>
+              <i class="bi bi-exclamation-triangle text-warning fs-5"></i>
+            </div>
+            <strong class="d-block fs-3 fw-bold">{{ productosStockBajo.length }}</strong>
+            <span class="text-secondary small">Productos por revisar</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="eyebrow text-uppercase">ÓRDENES</span>
+              <i class="bi bi-receipt text-primary fs-5"></i>
+            </div>
+            <strong class="d-block fs-3 fw-bold">{{ cantidadOrdenes }}</strong>
+            <span class="text-secondary small">Registradas en el sistema</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="eyebrow text-uppercase">CLIENTES</span>
+              <i class="bi bi-people text-primary fs-5"></i>
+            </div>
+            <strong class="d-block fs-3 fw-bold">{{ clientesRegistrados }}</strong>
+            <span class="text-secondary small">Clientes registrados</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="eyebrow text-uppercase">CATEGORÍAS</span>
+              <i class="bi bi-tags text-primary fs-5"></i>
+            </div>
+            <strong class="d-block fs-3 fw-bold">{{ categoriasActivas }}</strong>
+            <span class="text-secondary small">Categorías activas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="eyebrow text-uppercase">CRECIMIENTO</span>
+              <i class="bi bi-graph-up-arrow text-primary fs-5"></i>
+            </div>
+            <strong class="d-block fs-3 fw-bold">{{ crecimientoMensual }}%</strong>
+            <span class="text-secondary small">Comparado con el mes anterior</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Accesos rápidos -->
+    <section class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-4">
+      <div class="col">
+        <a routerLink="/admin/products/new" class="card h-100 text-decoration-none text-reset quick-action shadow-sm">
+          <div class="card-body">
+            <i class="bi bi-plus-circle text-primary fs-4 mb-2 d-block"></i>
+            <span class="eyebrow d-block text-uppercase">CATÁLOGO</span>
+            <strong class="d-block">Agregar producto</strong>
+            <span class="text-secondary small">Registrar nuevo producto</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a routerLink="/admin/products" class="card h-100 text-decoration-none text-reset quick-action shadow-sm">
+          <div class="card-body">
+            <i class="bi bi-tools text-primary fs-4 mb-2 d-block"></i>
+            <span class="eyebrow d-block text-uppercase">PRODUCTOS</span>
+            <strong class="d-block">Mantenimiento</strong>
+            <span class="text-secondary small">Editar, eliminar y gestionar stock</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a routerLink="/admin/inventory" class="card h-100 text-decoration-none text-reset quick-action shadow-sm">
+          <div class="card-body">
+            <i class="bi bi-boxes text-primary fs-4 mb-2 d-block"></i>
+            <span class="eyebrow d-block text-uppercase">INVENTARIO</span>
+            <strong class="d-block">Ver inventario</strong>
+            <span class="text-secondary small">Controlar stock y ubicación</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a routerLink="/admin/orders" class="card h-100 text-decoration-none text-reset quick-action shadow-sm">
+          <div class="card-body">
+            <i class="bi bi-receipt-cutoff text-primary fs-4 mb-2 d-block"></i>
+            <span class="eyebrow d-block text-uppercase">ÓRDENES</span>
+            <strong class="d-block">Ver órdenes</strong>
+            <span class="text-secondary small">Consultar ventas recientes</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Gráficos -->
+    <section class="row row-cols-1 row-cols-lg-2 g-3 mb-4">
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header bg-white">
+            <span class="eyebrow d-block text-uppercase">VENTAS</span>
+            <h2 class="h5 mb-0 mt-1">Ventas por mes</h2>
+          </div>
+          <div class="card-body">
+            <div class="chart-box">
+              <canvas #ventasChart></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header bg-white">
+            <span class="eyebrow d-block text-uppercase">CATEGORÍAS</span>
+            <h2 class="h5 mb-0 mt-1">Ventas por categoría</h2>
+          </div>
+          <div class="card-body">
+            <div class="chart-box">
+              <canvas #categoriaChart></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tablas -->
+    <section class="row row-cols-1 row-cols-lg-2 g-3">
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header bg-white">
+            <span class="eyebrow d-block text-uppercase">ÓRDENES</span>
+            <h2 class="h5 mb-0 mt-1">Órdenes recientes</h2>
+          </div>
+
+          <div class="card-body p-0" *ngIf="ordenesRecientes.length > 0; else sinOrdenes">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Orden</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th class="text-end">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let orden of ordenesRecientes">
+                    <td>#{{ orden.id }}</td>
+                    <td>{{ formatearFecha(orden.fecha) }}</td>
+                    <td><span class="badge" [ngClass]="claseEstadoOrden(orden.estado)">{{ orden.estado }}</span></td>
+                    <td class="text-end">S/ {{ orden.total.toFixed(2) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <ng-template #sinOrdenes>
+            <div class="card-body">
+              <p class="text-secondary mb-0">Todavía no hay órdenes registradas.</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header bg-white">
+            <span class="eyebrow d-block text-uppercase">INVENTARIO</span>
+            <h2 class="h5 mb-0 mt-1">Productos con stock bajo</h2>
+          </div>
+
+          <ul class="list-group list-group-flush" *ngIf="productosStockBajo.length > 0; else sinStockBajo">
+            <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let item of productosStockBajo">
+              <div>
+                <strong class="d-block">{{ nombreProducto(item.productId) }}</strong>
+                <span class="text-secondary small">{{ item.ubicacion }}</span>
+              </div>
+              <div class="text-end">
+                <b class="fs-5">{{ item.stockActual }}</b>
+                <small class="text-secondary d-block">/ mínimo {{ item.stockMinimo }}</small>
+              </div>
+            </li>
+          </ul>
+
+          <ng-template #sinStockBajo>
+            <div class="card-body">
+              <p class="text-secondary mb-0">No hay productos con stock bajo.</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
     </section>
   </ng-container>
 </main>

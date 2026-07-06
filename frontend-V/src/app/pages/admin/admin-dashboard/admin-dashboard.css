@@ -1,277 +1,166 @@
+/* ==========================================================================
+   admin-dashboard.css
+   Estilos propios sobre Bootstrap 5.3 + Bootstrap Icons
+   ========================================================================== */
+
+/* ---------- 1. Tokens / reskin de Bootstrap ---------- */
+
 :host {
   display: block;
-  min-height: calc(100vh - 76px);
   background: #f5f5f3;
   color: #191919;
+
+  /* Reasigna el color primario de Bootstrap a la marca.
+     Esto reskinea automáticamente text-primary, btn-outline-primary,
+     bordes con border-primary, spinners, etc. */
+  --bs-primary: #e51d2a;
+  --bs-primary-rgb: 229, 29, 42;
+  --bs-primary-text-emphasis: #b3151f;
+  --bs-link-color: var(--bs-primary);
+  --bs-link-hover-color: #b3151f;
+
+  --bs-body-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --bs-border-radius: 0.75rem;
+  --bs-border-radius-lg: 0.9rem;
+  --bs-card-border-radius: var(--bs-border-radius);
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 .admin-page {
   max-width: 1250px;
-  margin: auto;
-  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 3rem);
 }
 
-.admin-heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.admin-heading span,
-.summary-card small,
-.quick-actions small,
-.panel-heading small {
-  color: #e51d2a;
-  font-size: 0.7rem;
-  font-weight: 850;
-  letter-spacing: 0.12em;
-}
+/* ---------- 2. Encabezado ---------- */
 
 .admin-heading h1 {
-  margin: 0.45rem 0;
-  font-size: clamp(2.4rem, 5vw, 4.5rem);
-  font-weight: 900;
+  letter-spacing: -0.01em;
 }
 
 .admin-heading p,
 .admin-heading small {
   max-width: 640px;
-  margin: 0;
-  color: #747474;
 }
 
-.admin-heading > a,
-.quick-actions a {
-  border: 1px solid #d5d5d5;
-  border-radius: 8px;
-  background: #fff;
-  color: #222;
-  text-decoration: none;
-}
-
-.admin-heading > a {
-  padding: 0.8rem 1rem;
-  font-size: 0.8rem;
-  font-weight: 750;
+.admin-heading .btn {
+  font-weight: 600;
   white-space: nowrap;
 }
 
-.status-card,
-.summary-card,
-.panel,
-.quick-actions a {
-  border: 1px solid #e2e2df;
-  border-radius: 8px;
-  background: #fff;
+/* ---------- 3. Texto "eyebrow" (etiquetas pequeñas en mayúscula) ---------- */
+
+.eyebrow {
+  color: var(--bs-primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
 }
 
-.status-card {
-  padding: 1rem;
-  margin-bottom: 1rem;
+/* ---------- 4. Cards de resumen (summary) ---------- */
+
+.card {
+  border-color: #e2e2df;
 }
 
-.status-card.error {
-  border-color: #fecaca;
-  background: #fee2e2;
-  color: #991b1b;
+.card .fs-3 {
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+/* Card de alerta (stock bajo) con acento de color en el borde superior */
+.card.border-warning {
+  border-top: 3px solid #f59e0b !important;
 }
 
-.summary-card {
-  min-height: 130px;
-  padding: 1.25rem;
+/* ---------- 5. Accesos rápidos (quick actions) ---------- */
+
+.quick-action {
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.summary-card strong {
-  display: block;
-  margin: 0.45rem 0;
-  font-size: 1.8rem;
-  font-weight: 900;
+.quick-action:hover,
+.quick-action:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--bs-primary);
+  box-shadow: 0 10px 20px -10px rgba(var(--bs-primary-rgb), 0.35);
 }
 
-.summary-card span {
-  color: #747474;
-  font-size: 0.85rem;
+.quick-action i {
+  transition: transform 0.15s ease;
 }
 
-.summary-card.warning {
-  border-color: #f59e0b;
+.quick-action:hover i {
+  transform: translateX(2px);
 }
 
-.summary-card.simulated small {
-  color: #6b7280;
-}
-
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.quick-actions a {
-  display: grid;
-  gap: 0.35rem;
-  min-height: 120px;
-  padding: 1.15rem;
-}
-
-.quick-actions strong {
-  font-size: 1.05rem;
-}
-
-.quick-actions span {
-  color: #747474;
-  font-size: 0.85rem;
-}
-
-.charts-grid,
-.dashboard-content {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.panel {
-  padding: 1.25rem;
-}
-
-.panel-heading {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.panel-heading h2 {
-  margin: 0.2rem 0 0;
-  font-size: 1.2rem;
-}
+/* ---------- 6. Paneles de gráficos ---------- */
 
 .chart-box {
   position: relative;
   height: 270px;
 }
 
-.table-list,
-.stock-list {
-  display: grid;
-  gap: 0.75rem;
+.chart-box canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
 
-.table-row {
-  display: grid;
-  grid-template-columns: 0.7fr 1fr 1fr 0.9fr;
-  gap: 0.75rem;
-  align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #efefed;
-  font-size: 0.9rem;
+.card-header {
+  border-bottom: 1px solid #eee;
 }
 
-.table-row.header {
-  color: #747474;
+/* ---------- 7. Tabla de órdenes recientes ---------- */
+
+.table > thead {
   font-size: 0.75rem;
-  font-weight: 800;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
+  color: #747474;
+}
+
+.table td,
+.table th {
+  vertical-align: middle;
 }
 
 .badge {
-  width: fit-content;
-  border-radius: 999px;
-  padding: 0.25rem 0.55rem;
-  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- 8. Lista de inventario / stock bajo ---------- */
+
+.list-group-item b {
   font-weight: 800;
 }
 
-.text-bg-success {
-  background: #dcfce7;
-  color: #166534;
+.list-group-item:hover {
+  background: #fafafa;
 }
 
-.text-bg-warning {
-  background: #fef3c7;
-  color: #92400e;
+/* ---------- 9. Estados: cargando / error ---------- */
+
+.alert {
+  border-radius: var(--bs-border-radius);
 }
 
-.text-bg-danger {
-  background: #fee2e2;
-  color: #991b1b;
-}
+/* ---------- 10. Responsive ---------- */
 
-.text-bg-secondary {
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.stock-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.9rem;
-  border-radius: 8px;
-  background: #f8fafc;
-}
-
-.stock-item strong,
-.stock-item span {
-  display: block;
-}
-
-.stock-item span,
-.stock-item small,
-.empty-text {
-  color: #747474;
-}
-
-.stock-item p {
-  margin: 0;
-  text-align: right;
-}
-
-.stock-item b {
-  font-size: 1.2rem;
-}
-
-@media (max-width: 980px) {
-  .summary-grid,
-  .quick-actions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .charts-grid,
-  .dashboard-content {
-    grid-template-columns: 1fr;
+@media (max-width: 991.98px) {
+  .admin-heading h1 {
+    font-size: 2.4rem;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 575.98px) {
   .admin-heading {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .summary-grid,
-  .quick-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .table-row {
-    grid-template-columns: 1fr;
-  }
-
-  .table-row.header {
-    display: none;
+  .chart-box {
+    height: 220px;
   }
 }

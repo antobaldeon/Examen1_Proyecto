@@ -1,0 +1,260 @@
+<main class="settings-page container-fluid py-4 py-lg-5">
+  <header class="settings-header d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+      <span class="eyebrow d-block text-uppercase mb-1">ADMINISTRACION</span>
+      <h1 class="display-5 fw-black mb-2">Mantenimiento</h1>
+      <p class="text-secondary mb-0">Gestiona tu cuenta, administradores, usuarios y configuracion general.</p>
+    </div>
+
+    <a routerLink="/admin" class="btn btn-outline-dark">
+      <i class="bi bi-arrow-left-short me-1"></i>
+      Volver al panel
+    </a>
+  </header>
+
+  <section class="settings-shell">
+    <aside class="settings-sidebar">
+      <button type="button" [class.active]="activeTab === 'cuenta'" (click)="cambiarTab('cuenta')">
+        <i class="bi bi-person-gear"></i>
+        <span>Mi cuenta</span>
+      </button>
+      <button type="button" [class.active]="activeTab === 'crear-admin'" (click)="cambiarTab('crear-admin')">
+        <i class="bi bi-person-plus"></i>
+        <span>Crear administrador</span>
+      </button>
+      <button type="button" [class.active]="activeTab === 'usuarios'" (click)="cambiarTab('usuarios')">
+        <i class="bi bi-people"></i>
+        <span>Usuarios</span>
+      </button>
+      <button type="button" [class.active]="activeTab === 'configuracion'" (click)="cambiarTab('configuracion')">
+        <i class="bi bi-sliders"></i>
+        <span>Configuracion</span>
+      </button>
+    </aside>
+
+    <section class="settings-panel card border-0 shadow-sm">
+      <div class="alert alert-success d-flex align-items-center gap-2" *ngIf="mensaje">
+        <i class="bi bi-check-circle-fill"></i>
+        <span>{{ mensaje }}</span>
+      </div>
+      <div class="alert alert-danger d-flex align-items-center gap-2" *ngIf="error">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>{{ error }}</span>
+      </div>
+
+      <section *ngIf="activeTab === 'cuenta'">
+        <div class="panel-title">
+          <span class="eyebrow d-block text-uppercase">MI CUENTA</span>
+          <h2>Datos del administrador</h2>
+        </div>
+
+        <form class="row g-3" (ngSubmit)="guardarCuenta()">
+          <label class="col-md-6">
+            <span>Nombre completo</span>
+            <input class="form-control" name="cuentaNombre" [(ngModel)]="cuentaForm.nombre" required />
+          </label>
+
+          <label class="col-md-6">
+            <span>Correo</span>
+            <input class="form-control" type="email" name="cuentaEmail" [(ngModel)]="cuentaForm.email" required />
+          </label>
+
+          <label class="col-md-6">
+            <span>Rol</span>
+            <input class="form-control" name="cuentaRol" [value]="cuentaForm.rol" disabled />
+          </label>
+
+          <div class="col-12 d-flex justify-content-end">
+            <button class="btn btn-primary px-4" type="submit" [disabled]="guardandoCuenta">
+              <i class="bi bi-save me-1"></i>
+              {{ guardandoCuenta ? 'Guardando...' : 'Guardar datos' }}
+            </button>
+          </div>
+        </form>
+
+        <hr class="my-4" />
+
+        <form class="row g-3" (ngSubmit)="cambiarPassword()">
+          <label class="col-md-6">
+            <span>Nueva contrasena</span>
+            <input class="form-control" type="password" name="password" [(ngModel)]="passwordForm.password" autocomplete="new-password" />
+          </label>
+
+          <label class="col-md-6">
+            <span>Confirmar contrasena</span>
+            <input class="form-control" type="password" name="confirmarPassword" [(ngModel)]="passwordForm.confirmarPassword" autocomplete="new-password" />
+          </label>
+
+          <div class="col-12 d-flex justify-content-end">
+            <button class="btn btn-dark px-4" type="submit" [disabled]="guardandoCuenta">
+              <i class="bi bi-key me-1"></i>
+              Actualizar contrasena
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section *ngIf="activeTab === 'crear-admin'">
+        <div class="panel-title">
+          <span class="eyebrow d-block text-uppercase">ADMINISTRADORES</span>
+          <h2>Crear administrador</h2>
+        </div>
+
+        <form class="row g-3" (ngSubmit)="crearAdministrador()">
+          <label class="col-md-6">
+            <span>Nombre completo</span>
+            <input class="form-control" name="adminNombre" [(ngModel)]="adminForm.nombre" required />
+          </label>
+
+          <label class="col-md-6">
+            <span>Correo</span>
+            <input class="form-control" type="email" name="adminEmail" [(ngModel)]="adminForm.email" required />
+          </label>
+
+          <label class="col-md-6">
+            <span>Contrasena</span>
+            <input class="form-control" type="password" name="adminPassword" [(ngModel)]="adminForm.password" required autocomplete="new-password" />
+          </label>
+
+          <label class="col-md-6">
+            <span>Rol</span>
+            <input class="form-control" value="ADMIN" disabled />
+          </label>
+
+          <div class="col-12 d-flex justify-content-end">
+            <button class="btn btn-primary px-4" type="submit" [disabled]="guardandoAdmin">
+              <i class="bi bi-person-plus me-1"></i>
+              {{ guardandoAdmin ? 'Creando...' : 'Crear administrador' }}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section *ngIf="activeTab === 'usuarios'">
+        <div class="panel-title">
+          <span class="eyebrow d-block text-uppercase">USUARIOS</span>
+          <h2>Usuarios registrados</h2>
+        </div>
+
+        <div class="users-layout">
+          <div class="table-responsive users-table">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Correo</th>
+                  <th>Rol</th>
+                  <th class="text-end">Accion</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let usuario of usuarios">
+                  <td>#{{ usuario.id }}</td>
+                  <td>{{ usuario.nombre }}</td>
+                  <td>{{ usuario.email }}</td>
+                  <td>
+                    <span class="role-badge" [class.admin]="usuario.rol === 'ADMIN'">{{ usuario.rol }}</span>
+                  </td>
+                  <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-dark" (click)="editarUsuario(usuario)">
+                      <i class="bi bi-pencil-square me-1"></i>
+                      Editar
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p class="empty-text" *ngIf="!cargandoUsuarios && usuarios.length === 0">
+              No hay usuarios registrados.
+            </p>
+            <p class="empty-text" *ngIf="cargandoUsuarios">Cargando usuarios...</p>
+          </div>
+
+          <form class="edit-card card" *ngIf="usuarioEditando" (ngSubmit)="guardarUsuario()">
+            <div class="card-body">
+              <h3>Editar usuario #{{ usuarioEditando.id }}</h3>
+
+              <label>
+                <span>Nombre</span>
+                <input class="form-control" name="usuarioNombre" [(ngModel)]="usuarioForm.nombre" required />
+              </label>
+
+              <label>
+                <span>Correo</span>
+                <input class="form-control" type="email" name="usuarioEmail" [(ngModel)]="usuarioForm.email" required />
+              </label>
+
+              <label>
+                <span>Rol</span>
+                <select class="form-select" name="usuarioRol" [(ngModel)]="usuarioForm.rol">
+                  <option value="CLIENTE">CLIENTE</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
+              </label>
+
+              <div class="d-flex justify-content-end gap-2 mt-3">
+                <button type="button" class="btn btn-outline-secondary" (click)="cancelarEdicionUsuario()">Cancelar</button>
+                <button type="submit" class="btn btn-primary" [disabled]="guardandoUsuario">
+                  {{ guardandoUsuario ? 'Guardando...' : 'Guardar' }}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section *ngIf="activeTab === 'configuracion'">
+        <div class="panel-title">
+          <span class="eyebrow d-block text-uppercase">CONFIGURACION</span>
+          <h2>Preferencias generales</h2>
+        </div>
+
+        <form class="row g-3" (ngSubmit)="guardarConfiguracion()">
+          <label class="col-md-6">
+            <span>Nombre del negocio</span>
+            <input class="form-control" name="negocio" [(ngModel)]="configuracion.negocio" />
+          </label>
+
+          <label class="col-md-6">
+            <span>IGV (%)</span>
+            <input class="form-control" type="number" min="0" name="igv" [(ngModel)]="configuracion.igv" />
+          </label>
+
+          <label class="col-12">
+            <span>Aviso superior</span>
+            <input class="form-control" name="aviso" [(ngModel)]="configuracion.aviso" />
+          </label>
+
+          <label class="col-md-6">
+            <span>Metodo de entrega</span>
+            <input class="form-control" name="entrega" [(ngModel)]="configuracion.entrega" />
+          </label>
+
+          <label class="col-md-6">
+            <span>Correo de contacto</span>
+            <input class="form-control" type="email" name="correo" [(ngModel)]="configuracion.correo" />
+          </label>
+
+          <label class="col-md-6">
+            <span>Telefono</span>
+            <input class="form-control" name="telefono" [(ngModel)]="configuracion.telefono" />
+          </label>
+
+          <label class="col-md-6">
+            <span>Direccion de tienda</span>
+            <input class="form-control" name="direccion" [(ngModel)]="configuracion.direccion" />
+          </label>
+
+          <div class="col-12 d-flex justify-content-end">
+            <button class="btn btn-primary px-4" type="submit">
+              <i class="bi bi-sliders me-1"></i>
+              Guardar configuracion
+            </button>
+          </div>
+        </form>
+      </section>
+    </section>
+  </section>
+</main>

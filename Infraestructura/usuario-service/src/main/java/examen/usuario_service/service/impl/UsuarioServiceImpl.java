@@ -29,7 +29,22 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RuntimeException("El email ya está registrado");
         }
 
-        String nombreRol = request.getRol() != null ? request.getRol() : "CLIENTE";
+        return createUser(request, "CLIENTE");
+    }
+
+    @Override
+    public UsuarioResponse createAdmin(UsuarioRequest request) {
+        if (usuarioRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("El email ya está registrado");
+        }
+
+        return createUser(request, "ADMIN");
+    }
+
+    private UsuarioResponse createUser(UsuarioRequest request, String nombreRol) {
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new RuntimeException("La contraseña es obligatoria");
+        }
 
         Rol rol = rolRepository.findByNombre(nombreRol)
                 .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + nombreRol));
@@ -63,6 +78,43 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .stream()
                 .map(usuarioMapper::toResponse)
                 .toList();
+    }
+
+    @Override
+    public UsuarioResponse update(Long id, UsuarioRequest request) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuarioRepository.findByEmail(request.getEmail())
+                .filter(existing -> !existing.getId().equals(id))
+                .ifPresent(existing -> {
+                    throw new RuntimeException("El email ya está registrado");
+                });
+
+        usuario.setNombre(request.getNombre());
+        usuario.setEmail(request.getEmail());
+
+        if (request.getRol() != null && !request.getRol().isBlank()) {
+            Rol rol = rolRepository.findByNombre(request.getRol())
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + request.getRol()));
+            usuario.setRol(rol);
+        }
+
+        return usuarioMapper.toResponse(usuarioRepository.save(usuario));
+    }
+
+    @Override
+    public UsuarioResponse updatePassword(Long id, String password) {
+        if (password == null || password.isBlank()) {
+            throw new RuntimeException("La contraseña es obligatoria");
+        }
+
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuario.setPassword(passwordEncoder.encode(password));
+
+        return usuarioMapper.toResponse(usuarioRepository.save(usuario));
     }
 
 }

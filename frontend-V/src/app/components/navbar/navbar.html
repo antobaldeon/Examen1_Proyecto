@@ -9,6 +9,7 @@
       <a routerLink="/admin/products">Productos</a>
       <a routerLink="/admin/inventory">Inventario</a>
       <a routerLink="/admin/orders">Órdenes</a>
+      <a routerLink="/admin/settings">Administración</a>
     </ng-container>
 
     <ng-container *ngIf="isCliente">
@@ -25,9 +26,9 @@
     <a
       *ngIf="isAdmin"
       class="admin-icon-button"
-      routerLink="/admin"
-      aria-label="Abrir panel de administración"
-      title="Administración"
+      routerLink="/admin/settings"
+      aria-label="Abrir mantenimiento de administración"
+      title="Mantenimiento"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path
