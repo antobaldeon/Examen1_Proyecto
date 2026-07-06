@@ -9,10 +9,16 @@ public interface UsuarioService {
 
     UsuarioResponse register(UsuarioRequest request);
 
+    UsuarioResponse createAdmin(UsuarioRequest request);
+
     UsuarioResponse findByEmail(String email);
 
     UsuarioResponse findById(Long id);
 
     List<UsuarioResponse> findAll();
+
+    UsuarioResponse update(Long id, UsuarioRequest request);
+
+    UsuarioResponse updatePassword(Long id, String password);
 
 }

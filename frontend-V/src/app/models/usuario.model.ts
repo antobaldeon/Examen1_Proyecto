@@ -11,3 +11,7 @@ export interface UsuarioResponse {
   email: string;
   rol: string;
 }
+
+export interface PasswordUpdateRequest {
+  password: string;
+}

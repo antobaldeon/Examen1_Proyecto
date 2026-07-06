@@ -66,6 +66,12 @@ export class AuthService {
   localStorage.removeItem('email');
   localStorage.removeItem('rol');
 }
+
+  updateLocalProfile(nombre: string, email: string): void {
+    localStorage.setItem('nombre', nombre);
+    localStorage.setItem('email', email);
+  }
+
   getNombre(): string | null {
     return localStorage.getItem("nombre");
   }

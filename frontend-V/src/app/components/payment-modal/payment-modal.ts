@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaymentService } from '../../services/payment';
 import { PaymentRequest, PaymentResponse } from '../../models/payment.model';
+import { OrderService } from '../../services/order';
 
 @Component({
   selector: 'app-payment-modal',
@@ -34,7 +35,10 @@ export class PaymentModalComponent {
     city: ''
   };
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(
+    private paymentService: PaymentService,
+    private orderService: OrderService
+  ) {}
 
   confirmarPago(): void {
     if (!this.orderId || this.enviando || this.pagoConfirmadoOk) return;
@@ -56,7 +60,7 @@ export class PaymentModalComponent {
       },
       error: (err) => {
         console.error(err);
-        if (err?.status === 409) {
+        if (err?.status === 409 || err?.status === 504 || err?.status === 0) {
           this.cargarPagoExistente();
           return;
         }
@@ -70,17 +74,52 @@ export class PaymentModalComponent {
   private cargarPagoExistente(): void {
     if (!this.orderId) return;
 
-    this.paymentService.getByOrderId(this.orderId).subscribe({
-      next: (response) => {
-        this.pagoData = response;
+    window.setTimeout(() => {
+      if (!this.orderId) return;
+
+      this.paymentService.getByOrderId(this.orderId).subscribe({
+        next: (response) => {
+          this.pagoData = response;
+          this.enviando = false;
+          this.errorPago = null;
+          this.pagoConfirmadoOk = true;
+        },
+        error: (err) => {
+          console.error(err);
+          this.verificarOrdenPagada();
+        }
+      });
+    }, 900);
+  }
+
+  private verificarOrdenPagada(): void {
+    if (!this.orderId) return;
+
+    this.orderService.getById(this.orderId).subscribe({
+      next: (order) => {
         this.enviando = false;
-        this.errorPago = null;
-        this.pagoConfirmadoOk = true;
+
+        if (order.estado === 'PAGADA' || order.estado === 'COMPLETADA') {
+          this.pagoData = {
+            id: 0,
+            orderId: order.id,
+            monto: order.total,
+            nombreCompleto: order.usuarioNombre,
+            correoElectronico: order.usuarioEmail,
+            fechaPago: order.fecha,
+            estado: 'EXITOSO'
+          };
+          this.errorPago = null;
+          this.pagoConfirmadoOk = true;
+          return;
+        }
+
+        this.errorPago = 'No se pudo procesar el pago. Intenta nuevamente.';
       },
       error: (err) => {
         console.error(err);
         this.enviando = false;
-        this.errorPago = 'La orden ya fue procesada, pero no se pudo cargar la confirmación.';
+        this.errorPago = 'No se pudo confirmar el pago. Revisa tus pedidos antes de intentar nuevamente.';
       }
     });
   }

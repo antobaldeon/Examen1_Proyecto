@@ -131,6 +131,23 @@ resilience4j:
         slidingWindowSize: 10
         slidingWindowType: COUNT_BASED
 
+      paymentServiceGateway:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+
+  timelimiter:
+    instances:
+      paymentServiceGateway:
+        timeoutDuration: 20s
+        cancelRunningFuture: false
+
   retry:
     instances:
       productServiceGateway:

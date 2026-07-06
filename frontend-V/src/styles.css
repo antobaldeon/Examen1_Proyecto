@@ -1,13 +1,37 @@
+:root {
+  --itmac-red: #e51d2a;
+  --itmac-red-dark: #b81420;
+  --itmac-ink: #171717;
+  --itmac-text: #222222;
+  --itmac-muted: #6f6f6f;
+  --itmac-line: #e4e4df;
+  --itmac-soft: #f5f5f3;
+  --itmac-card: #ffffff;
+  --itmac-radius: 8px;
+  --itmac-shadow: 0 16px 40px rgb(20 20 20 / 8%);
+  --itmac-shadow-soft: 0 8px 24px rgb(20 20 20 / 6%);
+  --bs-primary: var(--itmac-red);
+  --bs-primary-rgb: 229, 29, 42;
+  --bs-body-font-family: Inter, "Segoe UI", Arial, sans-serif;
+  --bs-border-radius: var(--itmac-radius);
+  --bs-link-color: var(--itmac-red);
+  --bs-link-hover-color: var(--itmac-red-dark);
+}
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
+  min-width: 320px;
   margin: 0;
-  background: #f5f5f3;
-  color: #191919;
-  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 72%), rgb(245 245 243 / 100%) 360px),
+    var(--itmac-soft);
+  color: var(--itmac-text);
+  font-family: var(--bs-body-font-family);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -15,4 +39,66 @@ input,
 textarea,
 select {
   font-family: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgb(229 29 42 / 18%);
+  outline-offset: 2px;
+}
+
+.btn,
+button {
+  letter-spacing: 0;
+}
+
+.card,
+.modal-content,
+.dropdown-menu {
+  border-color: var(--itmac-line);
+  border-radius: var(--itmac-radius);
+}
+
+.card {
+  box-shadow: var(--itmac-shadow-soft);
+}
+
+.text-primary {
+  color: var(--itmac-red) !important;
+}
+
+.bg-primary {
+  background-color: var(--itmac-red) !important;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--itmac-red);
+  --bs-btn-border-color: var(--itmac-red);
+  --bs-btn-hover-bg: var(--itmac-red-dark);
+  --bs-btn-hover-border-color: var(--itmac-red-dark);
+  --bs-btn-active-bg: var(--itmac-red-dark);
+  --bs-btn-active-border-color: var(--itmac-red-dark);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--itmac-red);
+  --bs-btn-border-color: var(--itmac-red);
+  --bs-btn-hover-bg: var(--itmac-red);
+  --bs-btn-hover-border-color: var(--itmac-red);
 }

@@ -10,6 +10,7 @@ import { ProductCreateComponent } from './pages/admin/product-create/product-cre
 import { ProductsAdminComponent } from './pages/admin/products-admin/products-admin';
 import { InventoryAdminComponent } from './pages/admin/inventory-admin/inventory-admin';
 import { OrdersAdminComponent } from './pages/admin/orders-admin/orders-admin';
+import { AdminSettingsComponent } from './pages/admin/admin-settings/admin-settings';
 import { RegisterComponent } from './pages/register/register';
 import { MyOrdersComponent } from './pages/my-orders/my-orders';
 
@@ -26,5 +27,6 @@ export const routes: Routes = [
   { path: 'admin/products/new', component: ProductCreateComponent, canActivate: [adminGuard] },
   { path: 'admin/inventory', component: InventoryAdminComponent, canActivate: [adminGuard] },
   { path: 'admin/orders', component: OrdersAdminComponent, canActivate: [adminGuard] },
+  { path: 'admin/settings', component: AdminSettingsComponent, canActivate: [adminGuard] },
   { path: '**', redirectTo: 'login' }
 ];
